@@ -2,7 +2,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
-ffrom .const import (
+from .const import (  # 이 줄을 수정했습니다. 'ffrom'을 'from'으로 변경
     DOMAIN,
     CONF_APIKEY,
     CONF_START,
@@ -11,8 +11,8 @@ ffrom .const import (
     CONF_UPDATE_INTERVAL,
     CONF_FUTURE_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL,
-    DEFAULT_FUTURE_UPDATE_INTERVAL,
-)rom .const import DOMAIN, CONF_APIKEY, CONF_START, CONF_END, CONF_WAYPOINT, CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL
+    DEFAULT_FUTURE_UPDATE_INTERVAL
+)
 
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
