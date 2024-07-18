@@ -57,6 +57,9 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
         return {}
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
+    _LOGGER.debug(f"Setting up sensor for entry {config_entry.entry_id}")
+    _LOGGER.debug(f"hass.data[DOMAIN] contents: {hass.data[DOMAIN]}")
+
     coordinators = hass.data[DOMAIN].get(config_entry.entry_id)
     
     if not coordinators:
@@ -80,5 +83,3 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, route_name))
     
     async_add_entities(sensors)
-
-_LOGGER.debug(f"Data stored in hass.data[DOMAIN]: {hass.data[DOMAIN]}")
