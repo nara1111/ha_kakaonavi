@@ -1,0 +1,28 @@
+find_optimal_departure_time:
+  name: Find Optimal Departure Time
+  description: Find the optimal departure time within a given time range
+  fields:
+    start_time:
+      name: Start Time
+      description: Start of the time range to search (ISO format)
+      example: "2023-07-18T08:00:00"
+      required: true
+      selector:
+        datetime:
+    end_time:
+      name: End Time
+      description: End of the time range to search (ISO format)
+      example: "2023-07-18T10:00:00"
+      required: true
+      selector:
+        datetime:
+    interval:
+      name: Interval
+      description: Time interval between checks in minutes
+      example: 15
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 60
+          unit_of_measurement: minutes

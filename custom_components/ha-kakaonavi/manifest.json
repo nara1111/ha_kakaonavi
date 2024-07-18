@@ -1,0 +1,14 @@
+{
+  "domain": "ha_kakaonavi",
+  "name": "Kakao Navi",
+  "config_flow": true,
+  "documentation": "https://github.com/nara1111/ha_kakaonavi",
+  "requirements": ["requests"],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": ["@nara1111"],
+  "iot_class": "cloud_polling",
+  "version": "1.0.0"
+}
