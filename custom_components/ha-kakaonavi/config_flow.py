@@ -35,3 +35,16 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             errors=errors,
         )
+
+    async def validate_input(self, data):
+        client = KakaoNaviApiClient(data[CONF_APIKEY])
+        try:
+            result = await self.hass.async_add_executor_job(
+                client.direction, data[CONF_START], data[CONF_END]
+            )
+            if result is None:
+                return {"error": "invalid_api_key"}
+        except Exception as err:
+            _LOGGER.exception(f"Error validating API key: {err}")
+            return {"error": "cannot_connect"}
+        return {"title": f"Kakao Navi ({data[CONF_START]} to {data[CONF_END]})"}
