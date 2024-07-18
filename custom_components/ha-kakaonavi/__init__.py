@@ -1,3 +1,25 @@
+import logging
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from .const import (
+    DOMAIN,
+    CONF_APIKEY,
+    CONF_ROUTES,
+    CONF_START,
+    CONF_END,
+    CONF_WAYPOINT,
+    CONF_UPDATE_INTERVAL,
+    CONF_FUTURE_UPDATE_INTERVAL,
+    CONF_ROUTE_NAME,
+    DEFAULT_UPDATE_INTERVAL,
+    DEFAULT_FUTURE_UPDATE_INTERVAL,
+)
+from .coordinator import KakaoNaviDataUpdateCoordinator
+from .api import KakaoNaviApiClient
+
+_LOGGER = logging.getLogger(__name__)
+PLATFORMS = ["sensor"]
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
@@ -21,27 +43,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-        if not coordinator.last_update_success:
-            _LOGGER.error(f"Failed to retrieve initial data for route: {route['name']}")
-            continue
-        if coordinator.data is None:
-            _LOGGER.error(f"Coordinator data is None after initial refresh for route: {route['name']}")
-            continue
-        _LOGGER.info(f"Coordinator data after initial refresh for route {route['name']}: {coordinator.data}")
-        coordinators[route["name"]] = coordinator
-
-    if not coordinators:
-        _LOGGER.error("No routes were successfully initialized")
-        return False
-
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinators
-
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
-        )
-
     async def find_optimal_departure_time(call):
         route_name = call.data["route_name"]
         start_time = call.data["start_time"]
@@ -63,6 +64,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.states.async_set(f"{DOMAIN}.{route_name}_optimal_departure", result["optimal_departure_time"], result)
 
     hass.services.async_register(DOMAIN, "find_optimal_departure_time", find_optimal_departure_time)
+
+    _LOGGER.debug(f"Data stored in hass.data[DOMAIN]: {hass.data[DOMAIN]}")
 
     return True
 
