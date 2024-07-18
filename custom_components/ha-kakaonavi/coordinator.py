@@ -16,12 +16,13 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         end: str,
         waypoint: str,
         update_interval: int,
-        future_update_interval: int
+        future_update_interval: int,
+        route_name: str
     ):
         super().__init__(
             hass,
             _LOGGER,
-            name="KakaoNavi",
+            name=f"KakaoNavi_{route_name}",
             update_interval=timedelta(minutes=update_interval),
         )
         self.client = client
@@ -29,17 +30,18 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         self.end = end
         self.waypoint = waypoint
         self.future_update_interval = timedelta(minutes=future_update_interval)
+        self.route_name = route_name
 
     async def _async_update_data(self):
         try:
-            _LOGGER.debug("Fetching current direction data")
+            _LOGGER.debug(f"Fetching current direction data for route: {self.route_name}")
             current_data = await self.hass.async_add_executor_job(
                 self.client.direction, self.start, self.end, self.waypoint
             )
-            _LOGGER.debug(f"Current direction data: {current_data}")
+            _LOGGER.debug(f"Current direction data for route {self.route_name}: {current_data}")
 
             future_time = dt_util.now() + timedelta(minutes=30)
-            _LOGGER.debug("Fetching future direction data")
+            _LOGGER.debug(f"Fetching future direction data for route: {self.route_name}")
             future_data = await self.hass.async_add_executor_job(
                 self.client.future_direction,
                 self.start,
@@ -47,12 +49,12 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
                 self.waypoint,
                 future_time.strftime("%Y%m%d%H%M")
             )
-            _LOGGER.debug(f"Future direction data: {future_data}")
+            _LOGGER.debug(f"Future direction data for route {self.route_name}: {future_data}")
 
             if current_data is None or future_data is None:
-                _LOGGER.error("Failed to fetch data from Kakao Navi API")
+                _LOGGER.error(f"Failed to fetch data from Kakao Navi API for route: {self.route_name}")
                 return None
             return {"current": current_data, "future": future_data}
         except Exception as err:
-            _LOGGER.exception(f"Error communicating with API: {err}")
+            _LOGGER.exception(f"Error communicating with API for route {self.route_name}: {err}")
             raise UpdateFailed(f"Error communicating with API: {err}")
