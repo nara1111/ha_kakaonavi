@@ -1,6 +1,6 @@
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.entity_platform import async_get_platforms, async_forward_entry
+from homeassistant.helpers.typing import ConfigType
 from .const import (
     DOMAIN,
     CONF_APIKEY,
@@ -14,7 +14,6 @@ from .const import (
 )
 from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
-from .sensor import KakaoNaviEtaSensor
 
 PLATFORMS = ["sensor"]
 
@@ -35,13 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    async def async_setup_sensor(hass, entry, async_add_entities):
-        sensors = []
-        for i, route in enumerate(coordinator.data.get("current", {}).get("routes", []), 1):
-            sensors.append(KakaoNaviEtaSensor(coordinator, entry, i))
-        async_add_entities(sensors)
-
-    await async_forward_entry(hass, entry, async_setup_sensor)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def find_optimal_departure_time(call):
         start_time = call.data["start_time"]
