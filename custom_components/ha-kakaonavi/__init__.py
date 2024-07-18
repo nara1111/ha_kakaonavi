@@ -1,6 +1,16 @@
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from .const import DOMAIN, CONF_APIKEY, CONF_START, CONF_END, CONF_WAYPOINT
+from .const import (
+    DOMAIN,
+    CONF_APIKEY,
+    CONF_START,
+    CONF_END,
+    CONF_WAYPOINT,
+    CONF_UPDATE_INTERVAL,
+    CONF_FUTURE_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL,
+    DEFAULT_FUTURE_UPDATE_INTERVAL,
+)
 from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
 
