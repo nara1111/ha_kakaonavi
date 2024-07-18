@@ -2,12 +2,41 @@
     "config": {
         "step": {
             "user": {
-                "title": "Kakao Navi Configuration",
+                "title": "Kakao Navi API Key Configuration",
                 "data": {
-                    "apikey": "Kakao API Key (Required)",
+                    "apikey": "Kakao API Key (Required)"
+                }
+            },
+            "route": {
+                "title": "Add Route",
+                "data": {
+                    "name": "Route Name (Required)",
                     "start": "Start Location (Required)",
                     "end": "End Location (Required)",
                     "waypoint": "Waypoint (Optional)",
+                    "add_another": "Add Another Route"
+                }
+            },
+            "options": {
+                "title": "Global Settings",
+                "data": {
+                    "update_interval": "Update Interval (minutes)",
+                    "future_update_interval": "Future Update Interval (minutes)"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Invalid API key"
+        },
+        "abort": {
+            "already_configured": "Already configured"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Update Kakao Navi Settings",
+                "data": {
                     "update_interval": "Update Interval (minutes)",
                     "future_update_interval": "Future Update Interval (minutes)"
                 }
