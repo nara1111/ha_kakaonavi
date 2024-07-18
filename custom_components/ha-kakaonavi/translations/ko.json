@@ -2,12 +2,41 @@
     "config": {
         "step": {
             "user": {
-                "title": "카카오내비 설정",
+                "title": "카카오내비 API 키 설정",
                 "data": {
-                    "apikey": "카카오 API 키 (필수)",
+                    "apikey": "카카오 API 키 (필수)"
+                }
+            },
+            "route": {
+                "title": "경로 추가",
+                "data": {
+                    "name": "경로 이름 (필수)",
                     "start": "출발지 (필수)",
                     "end": "도착지 (필수)",
                     "waypoint": "경유지 (선택사항)",
+                    "add_another": "다른 경로 추가"
+                }
+            },
+            "options": {
+                "title": "글로벌 설정",
+                "data": {
+                    "update_interval": "업데이트 주기 (분)",
+                    "future_update_interval": "미래 정보 업데이트 주기 (분)"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "잘못된 API 키입니다"
+        },
+        "abort": {
+            "already_configured": "이미 구성되어 있습니다"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "카카오내비 설정 업데이트",
+                "data": {
                     "update_interval": "업데이트 주기 (분)",
                     "future_update_interval": "미래 정보 업데이트 주기 (분)"
                 }
