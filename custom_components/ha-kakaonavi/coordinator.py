@@ -3,6 +3,7 @@ import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
+from .api import KakaoNaviApiClient
 from .const import DOMAIN, MAX_DAILY_CALLS
 
 _LOGGER = logging.getLogger(__name__)

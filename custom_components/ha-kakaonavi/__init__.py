@@ -2,7 +2,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from .const import DOMAIN, CONF_APIKEY, CONF_START, CONF_END, CONF_WAYPOINT
 from .coordinator import KakaoNaviDataUpdateCoordinator
-from .sensor import KakaoNaviApiClient
+from .api import KakaoNaviApiClient
 
 PLATFORMS = ["sensor"]
 
