@@ -1,28 +1,5 @@
-import asyncio
-from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.typing import ConfigType
-from .const import (
-    DOMAIN,
-    CONF_APIKEY,
-    CONF_ROUTES,
-    CONF_START,
-    CONF_END,
-    CONF_WAYPOINT,
-    CONF_UPDATE_INTERVAL,
-    CONF_FUTURE_UPDATE_INTERVAL,
-    CONF_ROUTE_NAME,
-    DEFAULT_UPDATE_INTERVAL,
-    DEFAULT_FUTURE_UPDATE_INTERVAL,
-)
-from .coordinator import KakaoNaviDataUpdateCoordinator
-from .api import KakaoNaviApiClient
-import logging
-
-_LOGGER = logging.getLogger(__name__)
-PLATFORMS = ["sensor"]
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    hass.data.setdefault(DOMAIN, {})
     client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
     
     coordinators = {}
@@ -37,7 +14,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry.data.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
             route[CONF_ROUTE_NAME]
         )
-        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+        await coordinator.async_config_entry_first_refresh()
+        coordinators[route[CONF_ROUTE_NAME]] = coordinator
+
+    hass.data[DOMAIN][entry.entry_id] = coordinators
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
         if not coordinator.last_update_success:
             _LOGGER.error(f"Failed to retrieve initial data for route: {route['name']}")
             continue
