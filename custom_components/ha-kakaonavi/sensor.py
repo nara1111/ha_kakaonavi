@@ -53,4 +53,9 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
                 return {}
         return {}
 
-# async_setup_entry 함수는 __init__.py에서 처리하므로 여기서는 제거합니다.
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    sensors = []
+    for i, _ in enumerate(coordinator.data.get("current", {}).get("routes", []), 1):
+        sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, i))
+    async_add_entities(sensors)
