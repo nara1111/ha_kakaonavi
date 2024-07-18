@@ -80,3 +80,5 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, route_name))
     
     async_add_entities(sensors)
+
+_LOGGER.debug(f"Data stored in hass.data[DOMAIN]: {hass.data[DOMAIN]}")
