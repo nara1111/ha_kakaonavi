@@ -10,16 +10,16 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
     _attr_name = None
 
-    def __init__(self, coordinator, config_entry, index):
+    def __init__(self, coordinator, config_entry, route_name):
         super().__init__(coordinator)
         self._config_entry = config_entry
-        self._attr_unique_id = f"{config_entry.entry_id}_{index}"
+        self._route_name = route_name
+        self._attr_unique_id = f"{config_entry.entry_id}_{route_name}"
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, config_entry.entry_id)},
-            "name": f"Kakao Navi Route {index}",
+            "identifiers": {(DOMAIN, config_entry.entry_id, route_name)},
+            "name": f"Kakao Navi Route: {route_name}",
             "manufacturer": "Kakao",
         }
-        self._index = index - 1  # 인덱스를 0부터 시작하도록 조정
 
     @property
     def device_class(self):
@@ -33,7 +33,7 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
     def state(self):
         if self.coordinator.data and "current" in self.coordinator.data:
             try:
-                return round(self.coordinator.data["current"]["routes"][self._index]["summary"]["duration"] / 60, 2)
+                return round(self.coordinator.data["current"]["routes"][0]["summary"]["duration"] / 60, 2)
             except (KeyError, IndexError, TypeError):
                 return None
         return None
@@ -42,8 +42,8 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
     def extra_state_attributes(self):
         if self.coordinator.data:
             try:
-                current_data = self.coordinator.data["current"]["routes"][self._index]["summary"]
-                future_data = self.coordinator.data["future"]["routes"][self._index]["summary"]
+                current_data = self.coordinator.data["current"]["routes"][0]["summary"]
+                future_data = self.coordinator.data["future"]["routes"][0]["summary"]
                 return {
                     "current_eta": round(current_data["duration"] / 60, 2),
                     "future_eta": round(future_data["duration"] / 60, 2),
@@ -56,34 +56,23 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
                 return {}
         return {}
 
-
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    coordinator = hass.data[DOMAIN][config_entry.entry_id]
-
-    if coordinator is None:
-        _LOGGER.error("Coordinator is None. Cannot set up sensors.")
-        return
-
-    if coordinator.data is None:
-        _LOGGER.warning("No data in coordinator. Waiting for first refresh.")
-        await coordinator.async_refresh()
-
-    if coordinator.data is None:
-        _LOGGER.error("Failed to get data from coordinator after refresh.")
-        return
-
+    coordinators = hass.data[DOMAIN][config_entry.entry_id]
+    
     sensors = []
-    current_data = coordinator.data.get("current")
-    if current_data is None:
-        _LOGGER.warning("No 'current' data in coordinator.")
-        return
-
-    routes = current_data.get("routes", [])
-    if not routes:
-        _LOGGER.warning("No routes found in coordinator data.")
-        return
-
-    for i, _ in enumerate(routes, 1):
-        sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, i))
-
+    for route_name, coordinator in coordinators.items():
+        if coordinator.data is None:
+            _LOGGER.warning(f"No data in coordinator for route: {route_name}. Waiting for first refresh.")
+            await coordinator.async_refresh()
+        
+        if coordinator.data is None:
+            _LOGGER.error(f"Failed to get data from coordinator after refresh for route: {route_name}")
+            continue
+        
+        if "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
+            _LOGGER.warning(f"Invalid data structure in coordinator for route: {route_name}")
+            continue
+        
+        sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, route_name))
+    
     async_add_entities(sensors)
