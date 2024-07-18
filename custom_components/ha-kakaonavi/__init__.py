@@ -37,7 +37,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry.data.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
             route[CONF_ROUTE_NAME]
         )
-        await coordinator.async_config_entry_first_refresh()
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
         if not coordinator.last_update_success:
             _LOGGER.error(f"Failed to retrieve initial data for route: {route['name']}")
             continue
@@ -84,14 +84,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    unload_ok = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-            ]
-        )
-    )
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
+    
     return unload_ok
