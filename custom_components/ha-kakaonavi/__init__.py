@@ -15,7 +15,9 @@ from .const import (
 )
 from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
+import logging
 
+_LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -31,6 +33,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     await coordinator.async_config_entry_first_refresh()
+
+    if not coordinator.last_update_success:
+        _LOGGER.error("Failed to retrieve initial data from Kakao Navi API")
+        return False
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
