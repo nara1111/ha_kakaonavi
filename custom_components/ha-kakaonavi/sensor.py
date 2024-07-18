@@ -1,8 +1,8 @@
+import logging
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import UnitOfTime
 from .const import DOMAIN
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,17 +60,25 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
 async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    if not coordinator.data:
+    if coordinator is None:
+        _LOGGER.error("Coordinator is None. Cannot set up sensors.")
+        return
+
+    if coordinator.data is None:
         _LOGGER.warning("No data in coordinator. Waiting for first refresh.")
         await coordinator.async_refresh()
 
-    if not coordinator.data:
+    if coordinator.data is None:
         _LOGGER.error("Failed to get data from coordinator after refresh.")
         return
 
     sensors = []
-    routes = coordinator.data.get("current", {}).get("routes", [])
+    current_data = coordinator.data.get("current")
+    if current_data is None:
+        _LOGGER.warning("No 'current' data in coordinator.")
+        return
 
+    routes = current_data.get("routes", [])
     if not routes:
         _LOGGER.warning("No routes found in coordinator data.")
         return

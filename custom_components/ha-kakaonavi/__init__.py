@@ -38,6 +38,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.error("Failed to retrieve initial data from Kakao Navi API")
         return False
 
+    if coordinator.data is None:
+        _LOGGER.error("Coordinator data is None after initial refresh")
+        return False
+
+    _LOGGER.info(f"Coordinator data after initial refresh: {coordinator.data}")
+
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
 

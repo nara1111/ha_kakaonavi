@@ -26,34 +26,22 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         self.last_call_date = dt_util.now().date()
 
     async def _async_update_data(self):
-        current_date = dt_util.now().date()
-        if current_date > self.last_call_date:
-            self.daily_calls = 0
-            self.last_call_date = current_date
-
-        if self.daily_calls >= MAX_DAILY_CALLS:
-            _LOGGER.warning("Daily API call limit reached. Skipping update.")
-            return self.data
-
         try:
-            self.daily_calls += 1
             current_data = await self.hass.async_add_executor_job(
                 self.client.direction, self.start, self.end, self.waypoint
             )
-
-            future_data = self.data.get("future") if self.data else None
-            if not self.last_future_update or dt_util.now() - self.last_future_update >= self.future_update_interval:
-                self.daily_calls += 1
-                future_time = dt_util.now() + timedelta(minutes=30)
-                future_data = await self.hass.async_add_executor_job(
-                    self.client.future_direction,
-                    self.start,
-                    self.end,
-                    self.waypoint,
-                    future_time.strftime("%Y%m%d%H%M")
-                )
-                self.last_future_update = dt_util.now()
-
+            future_time = self.hass.datetime() + timedelta(minutes=30)
+            future_data = await self.hass.async_add_executor_job(
+                self.client.future_direction,
+                self.start,
+                self.end,
+                self.waypoint,
+                future_time.strftime("%Y%m%d%H%M")
+            )
+            if current_data is None or future_data is None:
+                _LOGGER.error("Failed to fetch data from Kakao Navi API")
+                return None
             return {"current": current_data, "future": future_data}
         except Exception as err:
+            _LOGGER.error(f"Error communicating with API: {err}")
             raise UpdateFailed(f"Error communicating with API: {err}")
