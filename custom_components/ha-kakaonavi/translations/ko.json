@@ -1,0 +1,17 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "카카오내비 설정",
+                "data": {
+                    "apikey": "카카오 API 키 (필수)",
+                    "start": "출발지 (필수)",
+                    "end": "도착지 (필수)",
+                    "waypoint": "경유지 (선택사항)",
+                    "update_interval": "업데이트 주기 (분)",
+                    "future_update_interval": "미래 정보 업데이트 주기 (분)"
+                }
+            }
+        }
+    }
+}
