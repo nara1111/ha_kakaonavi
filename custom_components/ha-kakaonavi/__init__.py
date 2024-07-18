@@ -24,12 +24,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         coordinator = KakaoNaviDataUpdateCoordinator(
             hass,
             client,
-            route["start"],
-            route["end"],
-            route.get("waypoint"),
-            entry.data.get(CONF_UPDATE_INTERVAL),
-            entry.data.get(CONF_FUTURE_UPDATE_INTERVAL),
-            route["name"]
+            route[CONF_START],
+            route[CONF_END],
+            route.get(CONF_WAYPOINT),
+            entry.data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
+            entry.data.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
+            route[CONF_ROUTE_NAME]
         )
         await coordinator.async_config_entry_first_refresh()
         if not coordinator.last_update_success:
