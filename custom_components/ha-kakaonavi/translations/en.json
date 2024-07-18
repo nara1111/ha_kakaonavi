@@ -4,9 +4,9 @@
             "user": {
                 "title": "Kakao Navi Configuration",
                 "data": {
-                    "apikey": "Kakao API Key",
-                    "start": "Start Location",
-                    "end": "End Location",
+                    "apikey": "Kakao API Key (Required)",
+                    "start": "Start Location (Required)",
+                    "end": "End Location (Required)",
                     "waypoint": "Waypoint (Optional)",
                     "update_interval": "Update Interval (minutes)",
                     "future_update_interval": "Future Update Interval (minutes)"
