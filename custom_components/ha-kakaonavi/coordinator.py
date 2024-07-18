@@ -3,7 +3,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 import logging
-
 from .api import KakaoNaviApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,10 +32,14 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         try:
+            _LOGGER.debug("Fetching current direction data")
             current_data = await self.hass.async_add_executor_job(
                 self.client.direction, self.start, self.end, self.waypoint
             )
+            _LOGGER.debug(f"Current direction data: {current_data}")
+
             future_time = dt_util.now() + timedelta(minutes=30)
+            _LOGGER.debug("Fetching future direction data")
             future_data = await self.hass.async_add_executor_job(
                 self.client.future_direction,
                 self.start,
@@ -44,10 +47,12 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
                 self.waypoint,
                 future_time.strftime("%Y%m%d%H%M")
             )
+            _LOGGER.debug(f"Future direction data: {future_data}")
+
             if current_data is None or future_data is None:
                 _LOGGER.error("Failed to fetch data from Kakao Navi API")
                 return None
             return {"current": current_data, "future": future_data}
         except Exception as err:
-            _LOGGER.error(f"Error communicating with API: {err}")
+            _LOGGER.exception(f"Error communicating with API: {err}")
             raise UpdateFailed(f"Error communicating with API: {err}")
