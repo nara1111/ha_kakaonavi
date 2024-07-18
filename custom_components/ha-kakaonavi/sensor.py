@@ -57,8 +57,12 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
         return {}
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    coordinators = hass.data[DOMAIN][config_entry.entry_id]
+    coordinators = hass.data[DOMAIN].get(config_entry.entry_id)
     
+    if not coordinators:
+        _LOGGER.error(f"No coordinators found for entry {config_entry.entry_id}")
+        return
+
     sensors = []
     for route_name, coordinator in coordinators.items():
         if coordinator.data is None:
