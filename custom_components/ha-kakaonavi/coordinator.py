@@ -38,7 +38,11 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             _LOGGER.debug(f"Fetching current direction data for route: {self.route_name}")
             current_data = await self.hass.async_add_executor_job(
-                self.client.direction, self.start, self.end, self.waypoint, self.priority
+                self.client.direction,
+                self.start,
+                self.end,
+                self.waypoint,
+                self.priority
             )
             _LOGGER.debug(f"Current direction data for route {self.route_name}: {current_data}")
 
@@ -60,4 +64,6 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
             return {"current": current_data, "future": future_data}
         except Exception as err:
             _LOGGER.exception(f"Error communicating with API for route {self.route_name}: {err}")
+            if isinstance(err, requests.exceptions.HTTPError):
+                _LOGGER.error(f"Response content: {err.response.content}")
             raise UpdateFailed(f"Error communicating with API: {err}")
