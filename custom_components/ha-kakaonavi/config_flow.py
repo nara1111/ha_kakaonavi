@@ -7,6 +7,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL,
     CONF_ROUTE_NAME, CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND
 )
+from .api import KakaoNaviApiClient
 
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -14,9 +15,15 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         errors = {}
         if user_input is not None:
-            await self.async_set_unique_id(user_input[CONF_APIKEY])
-            self._abort_if_unique_id_configured()
-            return self.async_create_entry(title="Kakao Navi", data=user_input)
+            try:
+                client = KakaoNaviApiClient(user_input[CONF_APIKEY])
+                await self.hass.async_add_executor_job(client.test_api_key)
+                await self.async_set_unique_id(user_input[CONF_APIKEY])
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(title="Kakao Navi", data=user_input)
+            except Exception as e:
+                _LOGGER.error(f"Error validating API key: {e}")
+                errors["base"] = "invalid_api_key"
 
         return self.async_show_form(
             step_id="user",
