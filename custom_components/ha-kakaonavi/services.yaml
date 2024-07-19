@@ -1,14 +1,16 @@
 find_optimal_departure_time:
   name: Find Optimal Departure Time
-  description: Find the optimal departure time for a specific route within a given time range
+  description: Find the optimal departure time for a specific route using the sensor name
   fields:
-    route_name:
-      name: Route Name
-      description: The name of the route to find the optimal departure time for
+    sensor_name:
+      name: Sensor Name
+      description: The name of the Kakao Navi ETA sensor
       required: true
-      example: "work_route"
+      example: "sensor.ha_kakaonavi_home_to_work_eta"
       selector:
-        text:
+        entity:
+          domain: sensor
+          integration: ha_kakaonavi
     start_time:
       name: Start Time
       description: Start of the time range to search (ISO format)
