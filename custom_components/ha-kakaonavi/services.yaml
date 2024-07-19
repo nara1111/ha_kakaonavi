@@ -13,14 +13,14 @@ find_optimal_departure_time:
           integration: ha_kakaonavi
     start_time:
       name: Start Time
-      description: Start of the time range to search (ISO format)
+      description: Start of the time range to search (ISO format or YYYY-MM-DD HH:MM:SS)
       required: true
       example: "2023-07-18T08:00:00"
       selector:
         datetime:
     end_time:
       name: End Time
-      description: End of the time range to search (ISO format)
+      description: End of the time range to search (ISO format or YYYY-MM-DD HH:MM:SS)
       required: true
       example: "2023-07-18T10:00:00"
       selector:
