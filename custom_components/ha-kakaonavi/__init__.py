@@ -15,8 +15,10 @@ from .const import (
     CONF_UPDATE_INTERVAL,
     CONF_FUTURE_UPDATE_INTERVAL,
     CONF_ROUTE_NAME,
+    CONF_PRIORITY,
     DEFAULT_UPDATE_INTERVAL,
     DEFAULT_FUTURE_UPDATE_INTERVAL,
+    PRIORITY_RECOMMEND,
 )
 from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
@@ -37,16 +39,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
     
     coordinators = {}
-    for route in entry.data[CONF_ROUTES]:
+    routes = entry.options.get("routes", [])
+    for route in routes:
         coordinator = KakaoNaviDataUpdateCoordinator(
             hass,
             client,
             route[CONF_START],
             route[CONF_END],
             route.get(CONF_WAYPOINT),
-            entry.data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
-            entry.data.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
-            route[CONF_ROUTE_NAME]
+            entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
+            entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
+            route[CONF_ROUTE_NAME],
+            route.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
         )
         try:
             await coordinator.async_config_entry_first_refresh()
@@ -87,6 +91,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.error("Both start_time and end_time must be provided")
             return
 
+        # Convert datetime objects to string format if necessary
+        if isinstance(start_time, datetime):
+            start_time = start_time.strftime("%Y%m%d%H%M")
+        if isinstance(end_time, datetime):
+            end_time = end_time.strftime("%Y%m%d%H%M")
+
         interval = call.data.get("interval", 30)
 
         coordinator = coordinators[route_name]
@@ -96,8 +106,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 coordinator.start,
                 coordinator.end,
                 coordinator.waypoint,
-                start_time.strftime("%Y%m%d%H%M"),
-                end_time.strftime("%Y%m%d%H%M"),
+                start_time,
+                end_time,
                 interval
             )
             hass.states.async_set(f"{DOMAIN}.{route_name}_optimal_departure", result["optimal_departure_time"], result)
@@ -111,6 +121,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         schema=SERVICE_FIND_OPTIMAL_DEPARTURE_TIME_SCHEMA
     )
 
+    entry.async_on_unload(entry.add_update_listener(update_listener))
+
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -120,3 +132,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
     
     return unload_ok
+
+async def update_listener(hass, entry):
+    """Handle options update."""
+    await hass.config_entries.async_reload(entry.entry_id)
