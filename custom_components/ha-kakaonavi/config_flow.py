@@ -1,81 +1,30 @@
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from .const import DOMAIN, CONF_APIKEY, CONF_ROUTES, CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL
-from .api import KakaoNaviApiClient
+from .const import (
+    DOMAIN, CONF_APIKEY, CONF_START, CONF_END, CONF_WAYPOINT,
+    CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL,
+    CONF_ROUTE_NAME, CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND
+)
 
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
-
-    def __init__(self):
-        self.api_key = None
-        self.routes = []
 
     async def async_step_user(self, user_input=None):
         errors = {}
         if user_input is not None:
-            valid = await self.hass.async_add_executor_job(
-                self._test_api_key, user_input[CONF_APIKEY]
-            )
-            if valid:
-                self.api_key = user_input[CONF_APIKEY]
-                return await self.async_step_route()
-            else:
-                errors["base"] = "invalid_api_key"
+            await self.async_set_unique_id(user_input[CONF_APIKEY])
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(title="Kakao Navi", data=user_input)
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema({vol.Required(CONF_APIKEY): str}),
-            errors=errors,
-        )
-
-    async def async_step_route(self, user_input=None):
-        errors = {}
-        if user_input is not None:
-            self.routes.append(user_input)
-            if user_input.get("add_another", False):
-                return await self.async_step_route()
-            else:
-                return await self.async_step_options()
-
-        return self.async_show_form(
-            step_id="route",
             data_schema=vol.Schema({
-                vol.Required("name"): str,
-                vol.Required("start"): str,
-                vol.Required("end"): str,
-                vol.Optional("waypoint"): str,
-                vol.Optional("add_another", default=False): bool,
+                vol.Required(CONF_APIKEY): str,
             }),
             errors=errors,
         )
-
-    async def async_step_options(self, user_input=None):
-        if user_input is not None:
-            return self.async_create_entry(
-                title="Kakao Navi",
-                data={
-                    CONF_APIKEY: self.api_key,
-                    CONF_ROUTES: self.routes,
-                    CONF_UPDATE_INTERVAL: user_input[CONF_UPDATE_INTERVAL],
-                    CONF_FUTURE_UPDATE_INTERVAL: user_input[CONF_FUTURE_UPDATE_INTERVAL],
-                },
-            )
-
-        return self.async_show_form(
-            step_id="options",
-            data_schema=vol.Schema({
-                vol.Required(CONF_UPDATE_INTERVAL, default=10): int,
-                vol.Required(CONF_FUTURE_UPDATE_INTERVAL, default=60): int,
-            }),
-        )
-
-    def _test_api_key(self, api_key):
-        client = KakaoNaviApiClient(api_key)
-        # API 키 유효성 검사 로직 구현
-        # 예: 간단한 API 호출을 수행하고 성공 여부 확인
-        return True  # 임시로 True 반환
 
     @staticmethod
     @callback
@@ -88,12 +37,35 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
+            if user_input.get("add_route", False):
+                return await self.async_step_route()
             return self.async_create_entry(title="", data=user_input)
 
+        options = {
+            vol.Required(CONF_UPDATE_INTERVAL, default=self.config_entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)): int,
+            vol.Required(CONF_FUTURE_UPDATE_INTERVAL, default=self.config_entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL)): int,
+            vol.Optional("add_route", default=False): bool,
+        }
+
+        return self.async_show_form(step_id="init", data_schema=vol.Schema(options))
+
+    async def async_step_route(self, user_input=None):
+        errors = {}
+        if user_input is not None:
+            routes = list(self.config_entry.options.get("routes", []))
+            routes.append(user_input)
+            new_options = dict(self.config_entry.options)
+            new_options["routes"] = routes
+            return self.async_create_entry(title="", data=new_options)
+
         return self.async_show_form(
-            step_id="init",
+            step_id="route",
             data_schema=vol.Schema({
-                vol.Required(CONF_UPDATE_INTERVAL, default=self.config_entry.options.get(CONF_UPDATE_INTERVAL, 10)): int,
-                vol.Required(CONF_FUTURE_UPDATE_INTERVAL, default=self.config_entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, 60)): int,
+                vol.Required(CONF_ROUTE_NAME): str,
+                vol.Required(CONF_START): str,
+                vol.Required(CONF_END): str,
+                vol.Optional(CONF_WAYPOINT): str,
+                vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
+            errors=errors,
         )
