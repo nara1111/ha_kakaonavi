@@ -17,7 +17,8 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         waypoint: str,
         update_interval: int,
         future_update_interval: int,
-        route_name: str
+        route_name: str,
+        priority: str
     ):
         super().__init__(
             hass,
@@ -31,12 +32,13 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         self.waypoint = waypoint
         self.future_update_interval = timedelta(minutes=future_update_interval)
         self.route_name = route_name
+        self.priority = priority
 
     async def _async_update_data(self):
         try:
             _LOGGER.debug(f"Fetching current direction data for route: {self.route_name}")
             current_data = await self.hass.async_add_executor_job(
-                self.client.direction, self.start, self.end, self.waypoint
+                self.client.direction, self.start, self.end, self.waypoint, self.priority
             )
             _LOGGER.debug(f"Current direction data for route {self.route_name}: {current_data}")
 
@@ -47,7 +49,8 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
                 self.start,
                 self.end,
                 self.waypoint,
-                future_time.strftime("%Y%m%d%H%M")
+                future_time.strftime("%Y%m%d%H%M"),
+                self.priority
             )
             _LOGGER.debug(f"Future direction data for route {self.route_name}: {future_data}")
 
