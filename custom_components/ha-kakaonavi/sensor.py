@@ -58,7 +58,11 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     _LOGGER.debug(f"Setting up sensor for entry {config_entry.entry_id}")
-    _LOGGER.debug(f"hass.data[DOMAIN] contents: {hass.data[DOMAIN]}")
+    _LOGGER.debug(f"hass.data contents: {hass.data}")
+
+    if DOMAIN not in hass.data:
+        _LOGGER.error(f"{DOMAIN} not found in hass.data")
+        return
 
     coordinators = hass.data[DOMAIN].get(config_entry.entry_id)
     
@@ -69,17 +73,16 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     sensors = []
     for route_name, coordinator in coordinators.items():
         if coordinator.data is None:
-            _LOGGER.warning(f"No data in coordinator for route: {route_name}. Waiting for first refresh.")
-            await coordinator.async_refresh()
-        
-        if coordinator.data is None:
-            _LOGGER.error(f"Failed to get data from coordinator after refresh for route: {route_name}")
+            _LOGGER.warning(f"No data in coordinator for route: {route_name}. Skipping.")
             continue
         
         if "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
-            _LOGGER.warning(f"Invalid data structure in coordinator for route: {route_name}")
+            _LOGGER.warning(f"Invalid data structure in coordinator for route: {route_name}. Skipping.")
             continue
         
         sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, route_name))
     
-    async_add_entities(sensors)
+    if sensors:
+        async_add_entities(sensors)
+    else:
+        _LOGGER.warning("No sensors were created")
