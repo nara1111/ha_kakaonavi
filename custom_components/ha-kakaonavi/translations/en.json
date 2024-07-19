@@ -6,39 +6,33 @@
                 "data": {
                     "apikey": "Kakao API Key (Required)"
                 }
-            },
-            "route": {
-                "title": "Add Route",
-                "data": {
-                    "name": "Route Name (Required)",
-                    "start": "Start Location (Required)",
-                    "end": "End Location (Required)",
-                    "waypoint": "Waypoint (Optional)",
-                    "add_another": "Add Another Route"
-                }
-            },
-            "options": {
-                "title": "Global Settings",
-                "data": {
-                    "update_interval": "Update Interval (minutes)",
-                    "future_update_interval": "Future Update Interval (minutes)"
-                }
             }
         },
         "error": {
             "invalid_api_key": "Invalid API key"
         },
         "abort": {
-            "already_configured": "Already configured"
+            "already_configured": "This API key is already configured"
         }
     },
     "options": {
         "step": {
             "init": {
-                "title": "Update Kakao Navi Settings",
+                "title": "Kakao Navi Global Settings",
                 "data": {
                     "update_interval": "Update Interval (minutes)",
-                    "future_update_interval": "Future Update Interval (minutes)"
+                    "future_update_interval": "Future Update Interval (minutes)",
+                    "add_route": "Add a new route"
+                }
+            },
+            "route": {
+                "title": "Add or Edit Route",
+                "data": {
+                    "name": "Route Name",
+                    "start": "Start Location",
+                    "end": "End Location",
+                    "waypoint": "Waypoint (Optional)",
+                    "priority": "Route Priority"
                 }
             }
         }
