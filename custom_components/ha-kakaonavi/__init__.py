@@ -1,6 +1,7 @@
 import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from .const import (
     DOMAIN,
     CONF_APIKEY,
@@ -18,9 +19,10 @@ from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS = ["sensor"]
+PLATFORMS = [Platform.SENSOR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    _LOGGER.debug(f"Setting up entry {entry.entry_id}")
     hass.data.setdefault(DOMAIN, {})
     client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
     
@@ -36,10 +38,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry.data.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
             route[CONF_ROUTE_NAME]
         )
-        await coordinator.async_config_entry_first_refresh()
+        try:
+            await coordinator.async_config_entry_first_refresh()
+        except Exception as err:
+            _LOGGER.error(f"Error refreshing coordinator for route {route[CONF_ROUTE_NAME]}: {err}")
+            continue
         coordinators[route[CONF_ROUTE_NAME]] = coordinator
 
+    if not coordinators:
+        _LOGGER.error("No coordinators were successfully initialized")
+        return False
+
     hass.data[DOMAIN][entry.entry_id] = coordinators
+    _LOGGER.debug(f"Data stored in hass.data[DOMAIN]: {hass.data[DOMAIN]}")
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -64,8 +75,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.states.async_set(f"{DOMAIN}.{route_name}_optimal_departure", result["optimal_departure_time"], result)
 
     hass.services.async_register(DOMAIN, "find_optimal_departure_time", find_optimal_departure_time)
-
-    _LOGGER.debug(f"Data stored in hass.data[DOMAIN]: {hass.data[DOMAIN]}")
 
     return True
 
