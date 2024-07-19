@@ -5,6 +5,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.helpers import config_validation as cv, entity_registry
+from homeassistant.exceptions import ConfigEntryNotReady
 from .const import (
     DOMAIN,
     CONF_APIKEY,
@@ -40,28 +41,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     coordinators = {}
     routes = entry.options.get("routes", [])
+    
+    if not routes:
+        _LOGGER.warning("No routes configured. Please add routes in the integration options.")
+        hass.data[DOMAIN][entry.entry_id] = coordinators
+        return True
+
     for route in routes:
-        coordinator = KakaoNaviDataUpdateCoordinator(
-            hass,
-            client,
-            route[CONF_START],
-            route[CONF_END],
-            route.get(CONF_WAYPOINT),
-            entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
-            entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
-            route[CONF_ROUTE_NAME],
-            route.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
-        )
         try:
+            coordinator = KakaoNaviDataUpdateCoordinator(
+                hass,
+                client,
+                route[CONF_START],
+                route[CONF_END],
+                route.get(CONF_WAYPOINT),
+                entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
+                entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL),
+                route[CONF_ROUTE_NAME],
+                route.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
+            )
             await coordinator.async_config_entry_first_refresh()
+            coordinators[route[CONF_ROUTE_NAME]] = coordinator
         except Exception as err:
-            _LOGGER.error(f"Error refreshing coordinator for route {route[CONF_ROUTE_NAME]}: {err}")
-            continue
-        coordinators[route[CONF_ROUTE_NAME]] = coordinator
+            _LOGGER.error(f"Error initializing coordinator for route {route.get(CONF_ROUTE_NAME, 'Unknown')}: {err}")
 
     if not coordinators:
-        _LOGGER.error("No coordinators were successfully initialized")
-        return False
+        _LOGGER.error("No coordinators were successfully initialized. Please check your configuration and API key.")
+        raise ConfigEntryNotReady
 
     hass.data[DOMAIN][entry.entry_id] = coordinators
     _LOGGER.debug(f"Data stored in hass.data[DOMAIN]: {hass.data[DOMAIN]}")
@@ -91,7 +97,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.error("Both start_time and end_time must be provided")
             return
 
-        # Convert datetime objects to string format if necessary
         if isinstance(start_time, datetime):
             start_time = start_time.strftime("%Y%m%d%H%M")
         if isinstance(end_time, datetime):
@@ -126,6 +131,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    _LOGGER.debug(f"Unloading entry {entry.entry_id}")
+    if entry.entry_id not in hass.data[DOMAIN]:
+        return True
+    
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     
     if unload_ok:
