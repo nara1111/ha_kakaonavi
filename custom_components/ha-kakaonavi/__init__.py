@@ -1,7 +1,10 @@
 import logging
+from datetime import datetime
+import voluptuous as vol
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
+from homeassistant.helpers import config_validation as cv
 from .const import (
     DOMAIN,
     CONF_APIKEY,
@@ -20,6 +23,13 @@ from .api import KakaoNaviApiClient
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SENSOR]
+
+SERVICE_FIND_OPTIMAL_DEPARTURE_TIME_SCHEMA = vol.Schema({
+    vol.Required("route_name"): cv.string,
+    vol.Required("start_time"): cv.datetime,
+    vol.Required("end_time"): cv.datetime,
+    vol.Optional("interval", default=30): cv.positive_int,
+})
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug(f"Setting up entry {entry.entry_id}")
@@ -55,26 +65,44 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def find_optimal_departure_time(call):
-        route_name = call.data["route_name"]
-        start_time = call.data["start_time"]
-        end_time = call.data["end_time"]
+        route_name = call.data.get("route_name")
+        if not route_name:
+            _LOGGER.error("No route_name provided in service call")
+            return
+
+        start_time = call.data.get("start_time")
+        end_time = call.data.get("end_time")
+        if not start_time or not end_time:
+            _LOGGER.error("Both start_time and end_time must be provided")
+            return
+
         interval = call.data.get("interval", 30)
+
         if route_name not in coordinators:
             _LOGGER.error(f"Route {route_name} not found")
             return
-        coordinator = coordinators[route_name]
-        result = await hass.async_add_executor_job(
-            coordinator.client.find_optimal_departure_time,
-            coordinator.start,
-            coordinator.end,
-            coordinator.waypoint,
-            start_time,
-            end_time,
-            interval
-        )
-        hass.states.async_set(f"{DOMAIN}.{route_name}_optimal_departure", result["optimal_departure_time"], result)
 
-    hass.services.async_register(DOMAIN, "find_optimal_departure_time", find_optimal_departure_time)
+        coordinator = coordinators[route_name]
+        try:
+            result = await hass.async_add_executor_job(
+                coordinator.client.find_optimal_departure_time,
+                coordinator.start,
+                coordinator.end,
+                coordinator.waypoint,
+                start_time.strftime("%Y%m%d%H%M"),
+                end_time.strftime("%Y%m%d%H%M"),
+                interval
+            )
+            hass.states.async_set(f"{DOMAIN}.{route_name}_optimal_departure", result["optimal_departure_time"], result)
+        except Exception as e:
+            _LOGGER.error(f"Error finding optimal departure time: {e}")
+
+    hass.services.async_register(
+        DOMAIN,
+        "find_optimal_departure_time",
+        find_optimal_departure_time,
+        schema=SERVICE_FIND_OPTIMAL_DEPARTURE_TIME_SCHEMA
+    )
 
     return True
 
