@@ -4,7 +4,7 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, entity_registry
 from .const import (
     DOMAIN,
     CONF_APIKEY,
@@ -25,7 +25,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SENSOR]
 
 SERVICE_FIND_OPTIMAL_DEPARTURE_TIME_SCHEMA = vol.Schema({
-    vol.Required("route_name"): cv.string,
+    vol.Required("sensor_name"): cv.entity_id,
     vol.Required("start_time"): cv.datetime,
     vol.Required("end_time"): cv.datetime,
     vol.Optional("interval", default=30): cv.positive_int,
@@ -65,9 +65,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def find_optimal_departure_time(call):
-        route_name = call.data.get("route_name")
-        if not route_name:
-            _LOGGER.error("No route_name provided in service call")
+        sensor_name = call.data.get("sensor_name")
+        if not sensor_name:
+            _LOGGER.error("No sensor_name provided in service call")
+            return
+
+        ent_reg = entity_registry.async_get(hass)
+        entity = ent_reg.async_get(sensor_name)
+        if not entity:
+            _LOGGER.error(f"Sensor {sensor_name} not found")
+            return
+
+        route_name = entity.unique_id.split('_')[-1]
+        if route_name not in coordinators:
+            _LOGGER.error(f"Route for sensor {sensor_name} not found")
             return
 
         start_time = call.data.get("start_time")
@@ -77,10 +88,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             return
 
         interval = call.data.get("interval", 30)
-
-        if route_name not in coordinators:
-            _LOGGER.error(f"Route {route_name} not found")
-            return
 
         coordinator = coordinators[route_name]
         try:
