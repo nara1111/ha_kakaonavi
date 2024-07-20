@@ -9,6 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
     _attr_name = None
+    _attr_icon = "mdi:routes-clock"
 
     def __init__(self, coordinator, config_entry, route_name):
         super().__init__(coordinator)
