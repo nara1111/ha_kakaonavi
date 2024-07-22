@@ -1,7 +1,7 @@
 import logging
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.const import UnitOfTime
+from homeassistant.const import UnitOfTime, LENGTH_KILOMETERS
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,12 +46,12 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
                 current_data = self.coordinator.data["current"]["routes"][0]["summary"]
                 future_data = self.coordinator.data["future"]["routes"][0]["summary"]
                 return {
-                    "current_eta": round(current_data["duration"] / 60, 2),
-                    "future_eta": round(future_data["duration"] / 60, 2),
-                    "eta_difference": round((future_data["duration"] - current_data["duration"]) / 60, 2),
-                    "distance": current_data["distance"],
-                    "taxi_fare": current_data["fare"]["taxi"],
-                    "toll_fare": current_data["fare"]["toll"],
+                    "current_ETA (min.)": round(current_data["duration"] / 60, 2),
+                    "future_ETA (min.)": round(future_data["duration"] / 60, 2),
+                    "ETA_difference (min.)": round((future_data["duration"] - current_data["duration"]) / 60, 2),
+                    "distance (km)": f"{round(current_data['distance'] / 1000, 2)} {LENGTH_KILOMETERS}",
+                    "taxi_fare (KRW)": f"{current_data['fare']['taxi']}",
+                    "toll_fare (KRW)": f"{current_data['fare']['toll']}",
                     "priority": self.coordinator.priority,
                 }
             except (KeyError, IndexError, TypeError):
