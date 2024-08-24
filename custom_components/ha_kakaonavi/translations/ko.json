@@ -4,7 +4,7 @@
             "user": {
                 "title": "카카오내비 API 키 및 첫 번째 경로 설정",
                 "data": {
-                    "apikey": "카카오 API 키 (필수)",
+                    "api_key": "카카오 API 키 (필수)",
                     "name": "경로 이름",
                     "start": "출발지",
                     "end": "도착지",

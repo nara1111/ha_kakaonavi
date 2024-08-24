@@ -1,17 +1,20 @@
 from typing import Any, Dict, Optional
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.const import UnitOfTime, LENGTH_KILOMETERS
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .const import DOMAIN, CONF_ROUTE_NAME
+from .const import (
+    DOMAIN, CONF_ROUTE_NAME, UNIT_OF_TIME, UNIT_OF_DISTANCE,
+    CONF_PRIORITY
+)
+from .coordinator import KakaoNaviDataUpdateCoordinator
 
 class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
     _attr_icon = "mdi:routes-clock"
 
-    def __init__(self, coordinator: "KakaoNaviDataUpdateCoordinator", config_entry: ConfigEntry,
+    def __init__(self, coordinator: KakaoNaviDataUpdateCoordinator, config_entry: ConfigEntry,
                  route_name: str) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
@@ -21,16 +24,16 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
         self._attr_translation_key = "kakaonavi_eta"
 
     @property
-    def device_class(self) -> str:
+    def device_class(self) -> SensorDeviceClass:
         return SensorDeviceClass.DURATION
 
     @property
-    def state_class(self) -> str:
+    def state_class(self) -> SensorStateClass:
         return SensorStateClass.MEASUREMENT
 
     @property
     def native_unit_of_measurement(self) -> str:
-        return UnitOfTime.MINUTES
+        return UNIT_OF_TIME
 
     @property
     def state(self) -> Optional[float]:
@@ -48,10 +51,10 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
                 "current_eta": round(current_data["duration"] / 60, 2),
                 "future_eta": round(future_data["duration"] / 60, 2),
                 "eta_difference": round((future_data["duration"] - current_data["duration"]) / 60, 2),
-                "distance": f"{round(current_data['distance'] / 1000, 2)}",
+                "distance": f"{round(current_data['distance'] / 1000, 2)} {UNIT_OF_DISTANCE}",
                 "taxi_fare": f"{current_data['fare']['taxi']:,}",
                 "toll_fare": f"{current_data['fare']['toll']:,}",
-                "priority": self.coordinator.route.get("priority"),
+                "priority": self.coordinator.route.get(CONF_PRIORITY),
             }
         except (KeyError, IndexError, TypeError):
             return {}
@@ -65,10 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
 
     sensors = []
     for route_name, coordinator in coordinators.items():
-        if coordinator.data is None:
-            continue
-
-        if "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
+        if coordinator.data is None or "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
             continue
 
         sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, route_name))

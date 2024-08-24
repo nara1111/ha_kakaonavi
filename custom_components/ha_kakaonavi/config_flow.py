@@ -1,12 +1,11 @@
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.const import CONF_NAME
 from .const import (
-    DOMAIN, CONF_APIKEY, CONF_START, CONF_END, CONF_WAYPOINT,
+    DOMAIN, CONF_APIKEY, CONF_ROUTE_NAME, CONF_START, CONF_END, CONF_WAYPOINT,
+    CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND,
     CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL,
-    DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL,
-    CONF_ROUTE_NAME, CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND
+    DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL
 )
 from .api import KakaoNaviApiClient
 
@@ -70,11 +69,14 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
 
         routes = self.config_entry.options.get("routes", [])
         if not routes:
-            return await self.async_step_route()
+            return await self.async_step_add_route()
 
         return self.async_show_menu(
             step_id="init",
-            menu_options=["edit_route", "add_route"]
+            menu_options={
+                "edit_route": "options.step.init.menu_options.edit_route",
+                "add_route": "options.step.init.menu_options.add_route"
+            }
         )
 
     async def async_step_edit_route(self, user_input=None):
@@ -100,7 +102,8 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
-            description_placeholders={"route_names": ", ".join(route_names)}
+            description_placeholders={"route_names": ", ".join(route_names)},
+            last_step=True
         )
 
     async def async_step_add_route(self, user_input=None):
@@ -122,4 +125,5 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
+            last_step=True
         )
