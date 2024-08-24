@@ -5,7 +5,7 @@ from .const import (
     DOMAIN, CONF_APIKEY, CONF_ROUTE_NAME, CONF_START, CONF_END, CONF_WAYPOINT,
     CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND,
     CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL,
-    DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL
+    DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL, CONF_ROUTES
 )
 from .api import KakaoNaviApiClient
 
@@ -42,7 +42,6 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except Exception as e:
                 errors["base"] = "invalid_api_key"
 
-
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
@@ -56,6 +55,7 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
             description_placeholders={
                 "name_description": "Route Name (e.g., Home to Work)",
+            }
         )
 
     @staticmethod
@@ -73,7 +73,7 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_edit_route(self, user_input=None):
         errors = {}
-        routes = self.config_entry.options.get("routes", [])
+        routes = self.config_entry.options.get(CONF_ROUTES, [])
 
         if user_input is not None:
             if "route_to_edit" in user_input:
@@ -88,7 +88,7 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
                 routes.append(user_input)
 
             new_options = dict(self.config_entry.options)
-            new_options["routes"] = routes
+            new_options[CONF_ROUTES] = routes
             return self.async_create_entry(title="", data=new_options)
 
         route_names = [route[CONF_ROUTE_NAME] for route in routes]
