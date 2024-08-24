@@ -24,7 +24,7 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
         super().__init__(
             hass,
             _LOGGER,
-            name=f"KakaoNavi_{route[CONF_ROUTE_NAME]}",
+            name=f"KakaoNavi_{route.get(CONF_ROUTE_NAME, 'Unknown')}",  # 수정된 부분
             update_interval=update_interval,
         )
         self.client = client
