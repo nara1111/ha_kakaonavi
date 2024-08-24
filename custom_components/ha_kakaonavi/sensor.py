@@ -59,18 +59,12 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
         except (KeyError, IndexError, TypeError):
             return {}
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry,
                             async_add_entities: AddEntitiesCallback) -> None:
-    coordinators = hass.data[DOMAIN].get(config_entry.entry_id)
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    if not coordinators:
+    if coordinator.data is None or "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
         return
 
-    sensors = []
-    for route_name, coordinator in coordinators.items():
-        if coordinator.data is None or "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
-            continue
-
-        sensors.append(KakaoNaviEtaSensor(coordinator, config_entry, route_name))
-
-    async_add_entities(sensors)
+    sensor = KakaoNaviEtaSensor(coordinator, entry)
+    async_add_entities([sensor])

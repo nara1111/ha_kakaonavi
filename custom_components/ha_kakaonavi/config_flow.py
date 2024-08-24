@@ -18,7 +18,9 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 client = KakaoNaviApiClient(user_input[CONF_APIKEY])
                 await self.hass.async_add_executor_job(client.test_api_key)
-                await self.async_set_unique_id(user_input[CONF_APIKEY])
+
+                unique_id = f"{user_input[CONF_APIKEY]}_{user_input[CONF_ROUTE_NAME]}"
+                await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
 
                 route = {
@@ -30,12 +32,11 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
 
                 return self.async_create_entry(
-                    title=self.hass.config.location_name,
-                    data={CONF_APIKEY: user_input[CONF_APIKEY]},
+                    title=f"{user_input[CONF_ROUTE_NAME]}",
+                    data={CONF_APIKEY: user_input[CONF_APIKEY], **route},
                     options={
                         CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
                         CONF_FUTURE_UPDATE_INTERVAL: DEFAULT_FUTURE_UPDATE_INTERVAL,
-                        "routes": [route]
                     }
                 )
             except Exception as e:
@@ -84,7 +85,8 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
         routes = self.config_entry.options.get("routes", [])
 
         if user_input is not None:
-            route_index = user_input.pop("route_index")
+            route_to_edit = user_input.pop("route_to_edit")
+            route_index = next(i for i, route in enumerate(routes) if route[CONF_ROUTE_NAME] == route_to_edit)
             routes[route_index] = user_input
             new_options = dict(self.config_entry.options)
             new_options["routes"] = routes
@@ -94,7 +96,7 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="edit_route",
             data_schema=vol.Schema({
-                vol.Required("route_index"): vol.In(range(len(routes))),
+                vol.Required("route_to_edit"): vol.In(route_names),
                 vol.Required(CONF_ROUTE_NAME): str,
                 vol.Required(CONF_START): str,
                 vol.Required(CONF_END): str,

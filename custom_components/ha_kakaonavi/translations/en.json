@@ -1,72 +1,66 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "title": "Kakao Navi API Key and Route Configuration",
-                "data": {
-                    "api_key": "Kakao API Key (Required)",
-                    "name": "Route name",
-                    "start": "Start point",
-                    "end": "End point",
-                    "waypoint": "Waypoint (Optional)",
-                    "priority": "Route priority"
-                }
-            }
-        },
-        "error": {
-            "invalid_api_key": "Invalid API key"
-        },
-        "abort": {
-            "already_configured": "This API key is already configured"
+  "config": {
+    "step": {
+      "user": {
+        "title": "Kakao Navi Setup",
+        "description": "Enter your API key from Kakao Developers and route information.",
+        "data": {
+          "api_key": "API Key",
+          "route_name": "Route Name",
+          "start": "Start Location",
+          "end": "End Location",
+          "waypoint": "Waypoint (Optional)",
+          "priority": "Priority"
         }
+      }
     },
-    "options": {
-        "step": {
-            "init": {
-                "title": "Kakao Navi Options",
-                "menu_options": {
-                    "edit_route": "Edit existing route",
-                    "add_route": "Add new route"
-                }
-            },
-            "edit_route": {
-                "title": "Edit Route",
-                "data": {
-                    "route_to_edit": "Select route to edit",
-                    "name": "Route name",
-                    "start": "Start point",
-                    "end": "End point",
-                    "waypoint": "Waypoint (Optional)",
-                    "priority": "Route priority"
-                },
-                "description": "Select a route to edit from: {route_names}"
-            },
-            "add_route": {
-                "title": "Add New Route",
-                "data": {
-                    "name": "Route name",
-                    "start": "Start point",
-                    "end": "End point",
-                    "waypoint": "Waypoint (Optional)",
-                    "priority": "Route priority"
-                }
-            }
-        }
+    "error": {
+      "invalid_api_key": "Invalid API key. Please check and try again."
     },
-    "entity": {
-        "sensor": {
-            "kakaonavi_eta": {
-                "name": "Kakao Navi ETA",
-                "state_attributes": {
-                    "current_eta": "Current ETA",
-                    "future_eta": "Future ETA",
-                    "eta_difference": "ETA Difference",
-                    "distance": "Distance",
-                    "taxi_fare": "Taxi Fare",
-                    "toll_fare": "Toll Fare",
-                    "priority": "Priority"
-                }
-            }
-        }
+    "abort": {
+      "already_configured": "This API key is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Kakao Navi Options",
+        "description": "Add or edit routes.",
+        "menu_options": {
+          "edit_route": "Edit existing route",
+          "add_route": "Add new route"
+        }
+      },
+      "edit_route": {
+        "title": "Edit Route",
+        "description": "Select a route to edit and modify its information.",
+        "data": {
+          "route_to_edit": "Route to edit",
+          "route_name": "Route Name",
+          "start": "Start Location",
+          "end": "End Location",
+          "waypoint": "Waypoint (Optional)",
+          "priority": "Priority"
+        }
+      },
+      "add_route": {
+        "title": "Add New Route",
+        "description": "Enter information for the new route.",
+        "data": {
+          "route_name": "Route Name",
+          "start": "Start Location",
+          "end": "End Location",
+          "waypoint": "Waypoint (Optional)",
+          "priority": "Priority"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "kakaonavi_eta": {
+        "name": "Kakao Navi ETA"
+      }
+    }
+  }
 }

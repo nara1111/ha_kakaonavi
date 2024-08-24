@@ -34,28 +34,8 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
     async def _async_update_data(self) -> Dict[str, Any]:
         try:
-            current_data = await self.hass.async_add_executor_job(
-                self.client.direction,
-                self.route[CONF_START],
-                self.route[CONF_END],
-                self.route.get(CONF_WAYPOINT),
-                self.route.get(CONF_PRIORITY)
-            )
-
-            now = dt_util.now()
-            if self.last_future_update is None or (now - self.last_future_update) >= self.future_update_interval:
-                future_time = now + timedelta(minutes=30)
-                future_data = await self.hass.async_add_executor_job(
-                    self.client.future_direction,
-                    self.route[CONF_START],
-                    self.route[CONF_END],
-                    self.route.get(CONF_WAYPOINT),
-                    future_time.strftime("%Y%m%d%H%M"),
-                    self.route.get(CONF_PRIORITY)
-                )
-                self.last_future_update = now
-            else:
-                future_data = self.data["future"] if self.data else None
+            current_data = await self._get_current_data()
+            future_data = await self._get_future_data()
 
             if current_data is None or future_data is None:
                 raise UpdateFailed(f"Failed to fetch data from Kakao Navi API for route: {self.route[CONF_ROUTE_NAME]}")
@@ -63,3 +43,29 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             return {"current": current_data, "future": future_data}
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API for route {self.route[CONF_ROUTE_NAME]}: {str(err)}")
+
+    async def _get_current_data(self) -> Dict[str, Any]:
+        return await self.hass.async_add_executor_job(
+            self.client.direction,
+            self.route[CONF_START],
+            self.route[CONF_END],
+            self.route.get(CONF_WAYPOINT),
+            self.route.get(CONF_PRIORITY)
+        )
+
+    async def _get_future_data(self) -> Dict[str, Any]:
+        now = dt_util.now()
+        if self.last_future_update is None or (now - self.last_future_update) >= self.future_update_interval:
+            future_time = now + timedelta(minutes=30)
+            future_data = await self.hass.async_add_executor_job(
+                self.client.future_direction,
+                self.route[CONF_START],
+                self.route[CONF_END],
+                self.route.get(CONF_WAYPOINT),
+                future_time.strftime("%Y%m%d%H%M"),
+                self.route.get(CONF_PRIORITY)
+            )
+            self.last_future_update = now
+            return future_data
+        else:
+            return self.data["future"] if self.data else None

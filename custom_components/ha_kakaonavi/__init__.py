@@ -13,27 +13,12 @@ PLATFORMS = [Platform.SENSOR]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
 
-    try:
-        client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
-    except KeyError:
-        raise ConfigEntryNotReady(f"API key not found in configuration")
+    client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
 
-    coordinators: Dict[str, KakaoNaviDataUpdateCoordinator] = {}
-    routes = entry.options.get(CONF_ROUTES, [])
+    coordinator = KakaoNaviDataUpdateCoordinator(hass, client, entry.data)
+    await coordinator.async_config_entry_first_refresh()
 
-    if not routes:
-        raise ConfigEntryNotReady("No routes configured. Please add routes in the integration options.")
-
-    for route in routes:
-        try:
-            coordinator = KakaoNaviDataUpdateCoordinator(hass, client, route)
-            await coordinator.async_config_entry_first_refresh()
-            coordinators[route[CONF_ROUTE_NAME]] = coordinator
-        except Exception as err:
-            raise ConfigEntryNotReady(
-                f"Error initializing coordinator for route {route.get(CONF_ROUTE_NAME, 'Unknown')}: {err}")
-
-    hass.data[DOMAIN][entry.entry_id] = coordinators
+    hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
