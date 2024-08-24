@@ -9,6 +9,7 @@ from .const import (
 )
 from .api import KakaoNaviApiClient
 
+
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
@@ -20,7 +21,25 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.hass.async_add_executor_job(client.test_api_key)
                 await self.async_set_unique_id(user_input[CONF_APIKEY])
                 self._abort_if_unique_id_configured()
-                return self.async_create_entry(title="Kakao Navi", data=user_input)
+
+                # Create the first route
+                route = {
+                    CONF_ROUTE_NAME: user_input[CONF_ROUTE_NAME],
+                    CONF_START: user_input[CONF_START],
+                    CONF_END: user_input[CONF_END],
+                    CONF_WAYPOINT: user_input.get(CONF_WAYPOINT),
+                    CONF_PRIORITY: user_input.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
+                }
+
+                return self.async_create_entry(
+                    title="Kakao Navi",
+                    data={CONF_APIKEY: user_input[CONF_APIKEY]},
+                    options={
+                        CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
+                        CONF_FUTURE_UPDATE_INTERVAL: DEFAULT_FUTURE_UPDATE_INTERVAL,
+                        "routes": [route]
+                    }
+                )
             except Exception as e:
                 errors["base"] = "invalid_api_key"
 
@@ -28,6 +47,11 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required(CONF_APIKEY): str,
+                vol.Required(CONF_ROUTE_NAME): str,
+                vol.Required(CONF_START): str,
+                vol.Required(CONF_END): str,
+                vol.Optional(CONF_WAYPOINT): str,
+                vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
         )

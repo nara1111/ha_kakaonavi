@@ -2,9 +2,14 @@
     "config": {
         "step": {
             "user": {
-                "title": "Kakao Navi API Key Configuration",
+                "title": "Kakao Navi API Key and First Route Configuration",
                 "data": {
-                    "apikey": "Kakao API Key (Required)"
+                    "apikey": "Kakao API Key (Required)",
+                    "name": "Route name",
+                    "start": "Start point",
+                    "end": "End point",
+                    "waypoint": "Waypoint (Optional)",
+                    "priority": "Route priority"
                 }
             }
         },
