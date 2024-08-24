@@ -1,6 +1,7 @@
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.const import CONF_NAME
 from .const import (
     DOMAIN, CONF_APIKEY, CONF_START, CONF_END, CONF_WAYPOINT,
     CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL,
@@ -8,7 +9,6 @@ from .const import (
     CONF_ROUTE_NAME, CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND
 )
 from .api import KakaoNaviApiClient
-
 
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -32,7 +32,7 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
 
                 return self.async_create_entry(
-                    title="Kakao Navi",
+                    title=f"Kakao Navi - {user_input[CONF_ROUTE_NAME]}",
                     data={CONF_APIKEY: user_input[CONF_APIKEY]},
                     options={
                         CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
@@ -77,7 +77,15 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
             vol.Optional("add_route", default=False): bool,
         }
 
-        return self.async_show_form(step_id="init", data_schema=vol.Schema(options))
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(options),
+            description_placeholders={
+                "update_interval": "options.step.init.data.update_interval",
+                "future_update_interval": "options.step.init.data.future_update_interval",
+                "add_route": "options.step.init.data.add_route"
+            }
+        )
 
     async def async_step_route(self, user_input=None):
         errors = {}
@@ -98,4 +106,11 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
+            description_placeholders={
+                "name": "options.step.route.data.name",
+                "start": "options.step.route.data.start",
+                "end": "options.step.route.data.end",
+                "waypoint": "options.step.route.data.waypoint",
+                "priority": "options.step.route.data.priority"
+            }
         )
