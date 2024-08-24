@@ -6,7 +6,7 @@
         "description": "Enter your API Key from Kakao Developers and route information to set",
         "data": {
           "api_key": "API Key",
-          "route_name": "Route Name",
+          "name": "Route Name",
           "start": "Departure",
           "end": "Destination",
           "waypoint": "Waypoint (Optional)",
@@ -31,7 +31,7 @@
         "title": "Edit Route",
         "description": "Modify route information",
         "data": {
-          "route_name": "Route Name",
+          "name": "Route Name",
           "start": "Departure",
           "end": "Destination",
           "waypoint": "Waypoint (Optional)",

@@ -6,7 +6,7 @@
         "description": "Kakao Developers에서 받은 API 키와 등록하고자 하는 경로 정보를 입력하세요.",
         "data": {
           "api_key": "API 키",
-          "route_name": "경로 이름",
+          "name": "경로 이름",
           "start": "출발지",
           "end": "도착지",
           "waypoint": "경유지 (선택사항)",
@@ -31,7 +31,7 @@
         "title": "경로 편집",
         "description": "경로 정보를 수정하세요.",
         "data": {
-          "route_name": "경로 이름",
+          "name": "경로 이름",
           "start": "출발지",
           "end": "도착지",
           "waypoint": "경유지 (선택사항)",

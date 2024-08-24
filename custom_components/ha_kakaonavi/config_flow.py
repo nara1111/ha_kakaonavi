@@ -54,6 +54,8 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
+            description_placeholders={
+                "name_description": "Route Name (e.g., Home to Work)",
         )
 
     @staticmethod
