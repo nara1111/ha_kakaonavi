@@ -2,7 +2,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.exceptions import ConfigEntryNotReady
-from .const import DOMAIN, CONF_APIKEY, CONF_ROUTES
+from .const import DOMAIN, CONF_APIKEY, CONF_ROUTES, CONF_ROUTE_NAME
 from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
 

@@ -1,10 +1,13 @@
 from typing import Any, Dict
 from datetime import timedelta
+import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from .api import KakaoNaviApiClient
-from .const import CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL
+from .const import CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL, CONF_ROUTE_NAME
+
+_LOGGER = logging.getLogger(__name__)
 
 class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
@@ -16,8 +19,8 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
         update_interval = timedelta(minutes=route.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL))
         super().__init__(
             hass,
-            logger=__name__,
-            name=f"KakaoNavi_{route['name']}",
+            _LOGGER,
+            name=f"KakaoNavi_{route[CONF_ROUTE_NAME]}",
             update_interval=update_interval,
         )
         self.client = client
@@ -51,8 +54,8 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
                 future_data = self.data["future"] if self.data else None
 
             if current_data is None or future_data is None:
-                raise UpdateFailed(f"Failed to fetch data from Kakao Navi API for route: {self.route['name']}")
+                raise UpdateFailed(f"Failed to fetch data from Kakao Navi API for route: {self.route[CONF_ROUTE_NAME]}")
 
             return {"current": current_data, "future": future_data}
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with API for route {self.route['name']}: {err}")
+            raise UpdateFailed(f"Error communicating with API for route {self.route[CONF_ROUTE_NAME]}: {err}")
