@@ -32,7 +32,7 @@
             "edit_route": {
                 "title": "경로 수정",
                 "data": {
-                    "route_index": "수정할 경로 선택",
+                    "route_to_edit": "수정할 경로 선택",
                     "name": "경로 이름",
                     "start": "출발지",
                     "end": "도착지",

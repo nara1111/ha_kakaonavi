@@ -2,53 +2,53 @@
     "config": {
         "step": {
             "user": {
-                "title": "카카오내비 API 키 및 첫 번째 경로 설정",
+                "title": "Kakao Navi API Key and First Route Configuration",
                 "data": {
-                    "api_key": "카카오 API 키 (필수)",
-                    "name": "경로 이름",
-                    "start": "출발지",
-                    "end": "도착지",
-                    "waypoint": "경유지 (선택사항)",
-                    "priority": "경로 우선순위"
+                    "api_key": "Kakao API Key (Required)",
+                    "name": "Route name",
+                    "start": "Start point",
+                    "end": "End point",
+                    "waypoint": "Waypoint (Optional)",
+                    "priority": "Route priority"
                 }
             }
         },
         "error": {
-            "invalid_api_key": "유효하지 않은 API 키입니다"
+            "invalid_api_key": "Invalid API key"
         },
         "abort": {
-            "already_configured": "이 API 키는 이미 구성되어 있습니다"
+            "already_configured": "This API key is already configured"
         }
     },
     "options": {
         "step": {
             "init": {
-                "title": "카카오내비 옵션",
+                "title": "Kakao Navi Options",
                 "menu_options": {
-                    "edit_route": "기존 경로 수정",
-                    "add_route": "새 경로 추가"
+                    "edit_route": "Edit existing route",
+                    "add_route": "Add new route"
                 }
             },
             "edit_route": {
-                "title": "경로 수정",
+                "title": "Edit Route",
                 "data": {
-                    "route_index": "수정할 경로 선택",
-                    "name": "경로 이름",
-                    "start": "출발지",
-                    "end": "도착지",
-                    "waypoint": "경유지 (선택사항)",
-                    "priority": "경로 우선순위"
+                    "route_to_edit": "Select route to edit",
+                    "name": "Route name",
+                    "start": "Start point",
+                    "end": "End point",
+                    "waypoint": "Waypoint (Optional)",
+                    "priority": "Route priority"
                 },
-                "description": "수정할 경로를 선택하세요: {route_names}"
+                "description": "Select a route to edit from: {route_names}"
             },
             "add_route": {
-                "title": "새 경로 추가",
+                "title": "Add New Route",
                 "data": {
-                    "name": "경로 이름",
-                    "start": "출발지",
-                    "end": "도착지",
-                    "waypoint": "경유지 (선택사항)",
-                    "priority": "경로 우선순위"
+                    "name": "Route name",
+                    "start": "Start point",
+                    "end": "End point",
+                    "waypoint": "Waypoint (Optional)",
+                    "priority": "Route priority"
                 }
             }
         }
@@ -56,15 +56,15 @@
     "entity": {
         "sensor": {
             "kakaonavi_eta": {
-                "name": "카카오내비 ETA",
+                "name": "Kakao Navi ETA",
                 "state_attributes": {
-                    "current_eta": "현재 ETA",
-                    "future_eta": "미래 ETA",
-                    "eta_difference": "ETA 차이",
-                    "distance": "거리",
-                    "taxi_fare": "택시 요금",
-                    "toll_fare": "통행료",
-                    "priority": "우선순위"
+                    "current_eta": "Current ETA",
+                    "future_eta": "Future ETA",
+                    "eta_difference": "ETA Difference",
+                    "distance": "Distance",
+                    "taxi_fare": "Taxi Fare",
+                    "toll_fare": "Toll Fare",
+                    "priority": "Priority"
                 }
             }
         }
