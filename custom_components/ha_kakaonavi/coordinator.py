@@ -51,4 +51,8 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator):
                 future_data = self.data["future"] if self.data else None
 
             if current_data is None or future_data is None:
-                raise
+                raise UpdateFailed(f"Failed to fetch data from Kakao Navi API for route: {self.route['name']}")
+
+            return {"current": current_data, "future": future_data}
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with API for route {self.route['name']}: {err}")
