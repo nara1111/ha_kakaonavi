@@ -2,40 +2,40 @@
   "config": {
     "step": {
       "user": {
-        "title": "Kakao Navi 설정",
-        "description": "Kakao Developers에서 받은 API 키와 경로 정보를 입력하세요.",
+        "title": "Kakao Navi Configuration",
+        "description": "Enter your API Key from Kakao Developers and route information to set",
         "data": {
-          "api_key": "API 키",
-          "route_name": "경로 이름",
-          "start": "출발지",
-          "end": "도착지",
-          "waypoint": "경유지 (선택사항)",
-          "priority": "우선순위"
+          "api_key": "API Key",
+          "route_name": "Route Name",
+          "start": "Departure",
+          "end": "Destination",
+          "waypoint": "Waypoint (Optional)",
+          "priority": "Preferred path-finding algorighm"
         }
       }
     },
     "error": {
-      "invalid_api_key": "잘못된 API 키입니다. 다시 확인해주세요."
+      "invalid_api_key": "Invalid API key. Please check and try again."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Kakao Navi 옵션",
-        "description": "경로를 추가하거나 편집하세요.",
+        "title": "Kakao Navi Options",
+        "description": "Edit the route.",
         "data": {
-          "route_to_edit": "편집할 경로"
+          "route_to_edit": "The route to edit"
         }
       },
       "edit_route": {
-        "title": "경로 편집",
-        "description": "경로 정보를 수정하세요.",
+        "title": "Edit Route",
+        "description": "Modify route information",
         "data": {
-          "route_name": "경로 이름",
-          "start": "출발지",
-          "end": "도착지",
-          "waypoint": "경유지 (선택사항)",
-          "priority": "우선순위"
+          "route_name": "Route Name",
+          "start": "Departure",
+          "end": "Destination",
+          "waypoint": "Waypoint (Optional)",
+          "priority": "Preferred path-finding algorighm"
         }
       }
     }
@@ -43,7 +43,7 @@
   "entity": {
     "sensor": {
       "kakaonavi_eta": {
-        "name": "카카오내비 ETA"
+        "name": "Kakao Navi ETA"
       }
     }
   }

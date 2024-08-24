@@ -19,10 +19,8 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 client = KakaoNaviApiClient(user_input[CONF_APIKEY])
                 await self.hass.async_add_executor_job(client.test_api_key)
-
-                # API 키를 고유 ID로 사용하는 부분 제거
-                # await self.async_set_unique_id(user_input[CONF_APIKEY])
-                # self._abort_if_unique_id_configured()
+                await self.async_set_unique_id(f"{user_input[CONF_APIKEY]}_{user_input[CONF_ROUTE_NAME]}")
+                self._abort_if_unique_id_configured()
 
                 return self.async_create_entry(
                     title=user_input[CONF_ROUTE_NAME],  # 경로 이름을 제목으로 사용
@@ -44,7 +42,6 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except Exception as e:
                 errors["base"] = "invalid_api_key"
 
-        # 나머지 코드는 그대로 유지
 
         return self.async_show_form(
             step_id="user",
