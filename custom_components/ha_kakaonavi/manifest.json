@@ -10,7 +10,7 @@
   "dependencies": [],
   "codeowners": ["@nara1111"],
   "iot_class": "cloud_polling",
-  "version": "0.1.6-alpha-2024-08-24",
+  "version": "0.1.7-alpha-2024-08-24",
   "translation_files": [
     "translations/{language}.json"
 ],
