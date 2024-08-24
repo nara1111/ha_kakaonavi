@@ -22,7 +22,6 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(user_input[CONF_APIKEY])
                 self._abort_if_unique_id_configured()
 
-                # Create the first route
                 route = {
                     CONF_ROUTE_NAME: user_input[CONF_ROUTE_NAME],
                     CONF_START: user_input[CONF_START],
@@ -32,7 +31,7 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
 
                 return self.async_create_entry(
-                    title=f"Kakao Navi - {user_input[CONF_ROUTE_NAME]}",
+                    title=self.hass.config.location_name,
                     data={CONF_APIKEY: user_input[CONF_APIKEY]},
                     options={
                         CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,

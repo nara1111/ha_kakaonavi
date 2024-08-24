@@ -18,6 +18,7 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
         self._route_name = route_name
         self._attr_unique_id = f"{config_entry.entry_id}_{route_name}"
         self._attr_name = f"Kakao Navi ETA - {route_name}"
+        self._attr_translation_key = "kakaonavi_eta"
 
     @property
     def device_class(self) -> str:
@@ -44,9 +45,9 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
             current_data = self.coordinator.data["current"]["routes"][0]["summary"]
             future_data = self.coordinator.data["future"]["routes"][0]["summary"]
             return {
-                "current_ETA": round(current_data["duration"] / 60, 2),
-                "future_ETA": round(future_data["duration"] / 60, 2),
-                "ETA_difference": round((future_data["duration"] - current_data["duration"]) / 60, 2),
+                "current_eta": round(current_data["duration"] / 60, 2),
+                "future_eta": round(future_data["duration"] / 60, 2),
+                "eta_difference": round((future_data["duration"] - current_data["duration"]) / 60, 2),
                 "distance": f"{round(current_data['distance'] / 1000, 2)}",
                 "taxi_fare": f"{current_data['fare']['taxi']:,}",
                 "toll_fare": f"{current_data['fare']['toll']:,}",

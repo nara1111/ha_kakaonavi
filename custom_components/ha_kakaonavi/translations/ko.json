@@ -23,21 +23,48 @@
     "options": {
         "step": {
             "init": {
-                "title": "카카오내비 전역 설정",
-                "data": {
-                    "update_interval": "업데이트 주기 (분)",
-                    "future_update_interval": "미래 정보 업데이트 주기 (분)",
+                "title": "카카오내비 옵션",
+                "menu_options": {
+                    "edit_route": "기존 경로 수정",
                     "add_route": "새 경로 추가"
                 }
             },
-            "route": {
-                "title": "경로 추가 또는 편집",
+            "edit_route": {
+                "title": "경로 수정",
+                "data": {
+                    "route_index": "수정할 경로 선택",
+                    "name": "경로 이름",
+                    "start": "출발지",
+                    "end": "도착지",
+                    "waypoint": "경유지 (선택사항)",
+                    "priority": "경로 우선순위"
+                },
+                "description": "수정할 경로를 선택하세요: {route_names}"
+            },
+            "add_route": {
+                "title": "새 경로 추가",
                 "data": {
                     "name": "경로 이름",
                     "start": "출발지",
                     "end": "도착지",
                     "waypoint": "경유지 (선택사항)",
                     "priority": "경로 우선순위"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "kakaonavi_eta": {
+                "name": "카카오내비 ETA",
+                "state_attributes": {
+                    "current_eta": "현재 ETA",
+                    "future_eta": "미래 ETA",
+                    "eta_difference": "ETA 차이",
+                    "distance": "거리",
+                    "taxi_fare": "택시 요금",
+                    "toll_fare": "통행료",
+                    "priority": "우선순위"
                 }
             }
         }

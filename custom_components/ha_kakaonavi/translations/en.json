@@ -23,21 +23,48 @@
     "options": {
         "step": {
             "init": {
-                "title": "Kakao Navi Global Settings",
-                "data": {
-                    "update_interval": "Update interval (minutes)",
-                    "future_update_interval": "Future information update interval (minutes)",
+                "title": "Kakao Navi Options",
+                "menu_options": {
+                    "edit_route": "Edit existing route",
                     "add_route": "Add new route"
                 }
             },
-            "route": {
-                "title": "Add or Edit Route",
+            "edit_route": {
+                "title": "Edit Route",
+                "data": {
+                    "route_index": "Select route to edit",
+                    "name": "Route name",
+                    "start": "Start point",
+                    "end": "End point",
+                    "waypoint": "Waypoint (Optional)",
+                    "priority": "Route priority"
+                },
+                "description": "Select a route to edit from: {route_names}"
+            },
+            "add_route": {
+                "title": "Add New Route",
                 "data": {
                     "name": "Route name",
                     "start": "Start point",
                     "end": "End point",
                     "waypoint": "Waypoint (Optional)",
                     "priority": "Route priority"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "kakaonavi_eta": {
+                "name": "Kakao Navi ETA",
+                "state_attributes": {
+                    "current_eta": "Current ETA",
+                    "future_eta": "Future ETA",
+                    "eta_difference": "ETA Difference",
+                    "distance": "Distance",
+                    "taxi_fare": "Taxi Fare",
+                    "toll_fare": "Toll Fare",
+                    "priority": "Priority"
                 }
             }
         }
