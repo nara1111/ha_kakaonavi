@@ -17,13 +17,10 @@ from .const import (
     CONF_FUTURE_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL,
     DEFAULT_FUTURE_UPDATE_INTERVAL,
-    PRIORITY_RECOMMEND,
-    PLATFORMS
+    PRIORITY_RECOMMEND
 )
 
-
 PLATFORMS = [Platform.SENSOR]
-
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
