@@ -3,6 +3,7 @@ from homeassistant.const import (
     CONF_API_KEY,
     UnitOfTime,
     UnitOfLength,
+    Platform,
 )
 
 DOMAIN = "ha_kakaonavi"
@@ -27,3 +28,4 @@ PRIORITY_OPTIONS = [PRIORITY_RECOMMEND, PRIORITY_TIME, PRIORITY_DISTANCE]
 # Add these new constants
 UNIT_OF_TIME = UnitOfTime.MINUTES
 UNIT_OF_DISTANCE = UnitOfLength.KILOMETERS
+PLATFORMS = [Platform.SENSOR]

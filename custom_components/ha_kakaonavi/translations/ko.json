@@ -16,9 +16,6 @@
     },
     "error": {
       "invalid_api_key": "잘못된 API 키입니다. 다시 확인해주세요."
-    },
-    "abort": {
-      "already_configured": "이 API 키는 이미 구성되어 있습니다."
     }
   },
   "options": {
@@ -26,26 +23,13 @@
       "init": {
         "title": "Kakao Navi 옵션",
         "description": "경로를 추가하거나 편집하세요.",
-        "menu_options": {
-          "edit_route": "기존 경로 편집",
-          "add_route": "새 경로 추가"
+        "data": {
+          "route_to_edit": "편집할 경로"
         }
       },
       "edit_route": {
         "title": "경로 편집",
-        "description": "편집할 경로를 선택하고 정보를 수정하세요.",
-        "data": {
-          "route_to_edit": "편집할 경로",
-          "route_name": "경로 이름",
-          "start": "출발지",
-          "end": "도착지",
-          "waypoint": "경유지 (선택사항)",
-          "priority": "우선순위"
-        }
-      },
-      "add_route": {
-        "title": "새 경로 추가",
-        "description": "새 경로의 정보를 입력하세요.",
+        "description": "경로 정보를 수정하세요.",
         "data": {
           "route_name": "경로 이름",
           "start": "출발지",

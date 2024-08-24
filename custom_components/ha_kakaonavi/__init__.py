@@ -1,13 +1,13 @@
-from typing import Dict
+import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.exceptions import ConfigEntryNotReady
 from .coordinator import KakaoNaviDataUpdateCoordinator
 from .api import KakaoNaviApiClient
 from .const import (
     DOMAIN,
     CONF_APIKEY,
+    CONF_ROUTES,  # 이 줄을 추가합니다.
     CONF_ROUTE_NAME,
     CONF_START,
     CONF_END,
@@ -17,15 +17,14 @@ from .const import (
     CONF_FUTURE_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL,
     DEFAULT_FUTURE_UPDATE_INTERVAL,
-    PRIORITY_RECOMMEND
+    PRIORITY_RECOMMEND,
+    PLATFORMS
 )
 
-PLATFORMS = [Platform.SENSOR]
+# 이 줄을 제거합니다:
+# PLATFORMS = [Platform.SENSOR]
 
-async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle options update."""
-    await hass.config_entries.async_reload(entry.entry_id)
-
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
@@ -33,22 +32,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     client = KakaoNaviApiClient(entry.data[CONF_APIKEY])
 
     routes = entry.options.get(CONF_ROUTES, [])
-
-    if not routes:
-        # 초기 설정 시 data에서 route 정보를 가져옵니다.
-        initial_route = {
-            CONF_ROUTE_NAME: entry.data.get(CONF_ROUTE_NAME, "Default Route"),
-            CONF_START: entry.data.get(CONF_START, ""),
-            CONF_END: entry.data.get(CONF_END, ""),
-            CONF_WAYPOINT: entry.data.get(CONF_WAYPOINT),
-            CONF_PRIORITY: entry.data.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
-        }
-        routes = [initial_route]
-
-        # options에 routes 정보를 추가합니다.
-        new_options = dict(entry.options)
-        new_options[CONF_ROUTES] = routes
-        hass.config_entries.async_update_entry(entry, options=new_options)
 
     coordinators = {}
     for route in routes:
@@ -58,6 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             coordinators[route[CONF_ROUTE_NAME]] = coordinator
         except Exception as err:
             _LOGGER.error(f"Error initializing coordinator for route {route.get(CONF_ROUTE_NAME, 'Unknown')}: {err}")
+            raise ConfigEntryNotReady from err
 
     hass.data[DOMAIN][entry.entry_id] = coordinators
 
@@ -67,7 +51,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return True
 
-
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle options update."""
     await hass.config_entries.async_reload(entry.entry_id)

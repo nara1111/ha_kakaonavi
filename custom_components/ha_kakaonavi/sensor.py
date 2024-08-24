@@ -61,10 +61,14 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry,
                             async_add_entities: AddEntitiesCallback) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinators = hass.data[DOMAIN][entry.entry_id]
 
-    if coordinator.data is None or "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
-        return
+    sensors = []
+    for route_name, coordinator in coordinators.items():
+        if coordinator.data is None or "current" not in coordinator.data or "routes" not in coordinator.data["current"]:
+            continue
+        sensor = KakaoNaviEtaSensor(coordinator, entry, route_name)
+        sensors.append(sensor)
 
-    sensor = KakaoNaviEtaSensor(coordinator, entry)
-    async_add_entities([sensor])
+    async_add_entities(sensors)
+
