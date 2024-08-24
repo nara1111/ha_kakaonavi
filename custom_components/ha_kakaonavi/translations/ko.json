@@ -31,6 +31,7 @@
         "title": "경로 편집",
         "description": "경로 정보를 수정하세요.",
         "data": {
+          "api_key": "API 키",
           "name": "경로 이름",
           "start": "출발지",
           "end": "도착지",
