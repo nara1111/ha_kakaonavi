@@ -1,0 +1,38 @@
+#find_optimal_departure_time:
+#  name: Find Optimal Departure Time
+#  description: Find the optimal departure time for a specific route using the sensor name
+#  fields:
+#    sensor_name:
+#      name: Sensor Name
+#      description: The name of the Kakao Navi ETA sensor
+#      required: true
+#      example: "sensor.ha_kakaonavi_home_to_work_eta"
+#      selector:
+#        entity:
+#          domain: sensor
+#          integration: ha_kakaonavi
+#    start_time:
+#      name: Start Time
+#      description: Start of the time range to search (ISO format or YYYY-MM-DD HH:MM:SS)
+#      required: true
+#      example: "2023-07-18T08:00:00"
+#      selector:
+#        datetime:
+#    end_time:
+#      name: End Time
+#      description: End of the time range to search (ISO format or YYYY-MM-DD HH:MM:SS)
+#      required: true
+#      example: "2023-07-18T10:00:00"
+#      selector:
+#        datetime:
+#    interval:
+#      name: Interval
+#      description: Time interval between checks in minutes
+#      required: false
+#      default: 30
+#      example: 15
+#      selector:
+#        number:
+#          min: 5
+#          max: 60
+#          unit_of_measurement: minutes

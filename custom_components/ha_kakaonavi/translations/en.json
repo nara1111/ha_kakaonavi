@@ -20,19 +20,19 @@
             "init": {
                 "title": "Kakao Navi Global Settings",
                 "data": {
-                    "update_interval": "Update Interval (minutes)",
-                    "future_update_interval": "Future Update Interval (minutes)",
-                    "add_route": "Add a new route"
+                    "update_interval": "Update interval (minutes)",
+                    "future_update_interval": "Future information update interval (minutes)",
+                    "add_route": "Add new route"
                 }
             },
             "route": {
                 "title": "Add or Edit Route",
                 "data": {
-                    "name": "Route Name",
-                    "start": "Start Location",
-                    "end": "End Location",
+                    "name": "Route name",
+                    "start": "Start point",
+                    "end": "End point",
                     "waypoint": "Waypoint (Optional)",
-                    "priority": "Route Priority"
+                    "priority": "Route priority"
                 }
             }
         }

@@ -22,7 +22,6 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title="Kakao Navi", data=user_input)
             except Exception as e:
-                _LOGGER.error(f"Error validating API key: {e}")
                 errors["base"] = "invalid_api_key"
 
         return self.async_show_form(
