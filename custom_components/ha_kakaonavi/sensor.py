@@ -5,11 +5,10 @@ from homeassistant.const import UnitOfTime, LENGTH_KILOMETERS
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .const import DOMAIN
+from .const import DOMAIN, CONF_ROUTE_NAME
 
 class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
-    _attr_name = None
     _attr_icon = "mdi:routes-clock"
 
     def __init__(self, coordinator: "KakaoNaviDataUpdateCoordinator", config_entry: ConfigEntry,
@@ -18,13 +17,7 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
         self._config_entry = config_entry
         self._route_name = route_name
         self._attr_unique_id = f"{config_entry.entry_id}_{route_name}"
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, config_entry.entry_id)},
-            "name": f"Kakao Navi - {route_name}",
-            "manufacturer": "Kakao",
-            "model": "Navi API",
-            "sw_version": "1.0",
-        }
+        self._attr_name = f"Kakao Navi ETA - {route_name}"
 
     @property
     def device_class(self) -> str:
@@ -55,8 +48,8 @@ class KakaoNaviEtaSensor(CoordinatorEntity, SensorEntity):
                 "future_ETA": round(future_data["duration"] / 60, 2),
                 "ETA_difference": round((future_data["duration"] - current_data["duration"]) / 60, 2),
                 "distance": f"{round(current_data['distance'] / 1000, 2)}",
-                "taxi_fare": f"{current_data['fare']['taxi']}",
-                "toll_fare": f"{current_data['fare']['toll']}",
+                "taxi_fare": f"{current_data['fare']['taxi']:,}",
+                "toll_fare": f"{current_data['fare']['toll']:,}",
                 "priority": self.coordinator.route.get("priority"),
             }
         except (KeyError, IndexError, TypeError):

@@ -67,27 +67,44 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
-            if user_input.get("add_route", False):
-                return await self.async_step_route()
             return self.async_create_entry(title="", data=user_input)
 
-        options = {
-            vol.Required(CONF_UPDATE_INTERVAL, default=self.config_entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)): int,
-            vol.Required(CONF_FUTURE_UPDATE_INTERVAL, default=self.config_entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL)): int,
-            vol.Optional("add_route", default=False): bool,
-        }
+        routes = self.config_entry.options.get("routes", [])
+        if not routes:
+            return await self.async_step_route()
 
-        return self.async_show_form(
+        return self.async_show_menu(
             step_id="init",
-            data_schema=vol.Schema(options),
-            description_placeholders={
-                "update_interval": "options.step.init.data.update_interval",
-                "future_update_interval": "options.step.init.data.future_update_interval",
-                "add_route": "options.step.init.data.add_route"
-            }
+            menu_options=["edit_route", "add_route"]
         )
 
-    async def async_step_route(self, user_input=None):
+    async def async_step_edit_route(self, user_input=None):
+        errors = {}
+        routes = self.config_entry.options.get("routes", [])
+
+        if user_input is not None:
+            route_index = user_input.pop("route_index")
+            routes[route_index] = user_input
+            new_options = dict(self.config_entry.options)
+            new_options["routes"] = routes
+            return self.async_create_entry(title="", data=new_options)
+
+        route_names = [route[CONF_ROUTE_NAME] for route in routes]
+        return self.async_show_form(
+            step_id="edit_route",
+            data_schema=vol.Schema({
+                vol.Required("route_index"): vol.In(range(len(routes))),
+                vol.Required(CONF_ROUTE_NAME): str,
+                vol.Required(CONF_START): str,
+                vol.Required(CONF_END): str,
+                vol.Optional(CONF_WAYPOINT): str,
+                vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
+            }),
+            errors=errors,
+            description_placeholders={"route_names": ", ".join(route_names)}
+        )
+
+    async def async_step_add_route(self, user_input=None):
         errors = {}
         if user_input is not None:
             routes = list(self.config_entry.options.get("routes", []))
@@ -97,7 +114,7 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=new_options)
 
         return self.async_show_form(
-            step_id="route",
+            step_id="add_route",
             data_schema=vol.Schema({
                 vol.Required(CONF_ROUTE_NAME): str,
                 vol.Required(CONF_START): str,
@@ -106,11 +123,4 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
-            description_placeholders={
-                "name": "options.step.route.data.name",
-                "start": "options.step.route.data.start",
-                "end": "options.step.route.data.end",
-                "waypoint": "options.step.route.data.waypoint",
-                "priority": "options.step.route.data.priority"
-            }
         )
