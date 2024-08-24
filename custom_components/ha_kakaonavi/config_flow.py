@@ -18,22 +18,19 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 client = KakaoNaviApiClient(user_input[CONF_APIKEY])
                 await self.hass.async_add_executor_job(client.test_api_key)
-
-                unique_id = f"{user_input[CONF_APIKEY]}_{user_input[CONF_ROUTE_NAME]}"
-                await self.async_set_unique_id(unique_id)
+                await self.async_set_unique_id(user_input[CONF_APIKEY])
                 self._abort_if_unique_id_configured()
 
-                route = {
-                    CONF_ROUTE_NAME: user_input[CONF_ROUTE_NAME],
-                    CONF_START: user_input[CONF_START],
-                    CONF_END: user_input[CONF_END],
-                    CONF_WAYPOINT: user_input.get(CONF_WAYPOINT),
-                    CONF_PRIORITY: user_input.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
-                }
-
                 return self.async_create_entry(
-                    title=f"{user_input[CONF_ROUTE_NAME]}",
-                    data={CONF_APIKEY: user_input[CONF_APIKEY], **route},
+                    title=self.hass.config.location_name,
+                    data={
+                        CONF_APIKEY: user_input[CONF_APIKEY],
+                        CONF_ROUTE_NAME: user_input[CONF_ROUTE_NAME],
+                        CONF_START: user_input[CONF_START],
+                        CONF_END: user_input[CONF_END],
+                        CONF_WAYPOINT: user_input.get(CONF_WAYPOINT),
+                        CONF_PRIORITY: user_input.get(CONF_PRIORITY, PRIORITY_RECOMMEND)
+                    },
                     options={
                         CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
                         CONF_FUTURE_UPDATE_INTERVAL: DEFAULT_FUTURE_UPDATE_INTERVAL,
