@@ -35,10 +35,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for route in routes:
         try:
             coordinator = KakaoNaviDataUpdateCoordinator(hass, client, route)
-            await coordinator.async_refresh()
+            await coordinator.async_config_entry_first_refresh()
             coordinators[route[CONF_ROUTE_NAME]] = coordinator
         except Exception as err:
-            _LOGGER.error(f"Error initializing coordinator for route {route.get(CONF_ROUTE_NAME, 'Unknown')}: {err}")
+            _LOGGER.error(f"Error initializing coordinator for route {route.get(CONF_ROUTE_NAME, 'Unknown')}: {str(err)}")
             raise ConfigEntryNotReady from err
 
     hass.data[DOMAIN][entry.entry_id] = coordinators
