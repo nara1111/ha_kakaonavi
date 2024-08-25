@@ -59,22 +59,45 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         return KakaoNaviOptionsFlow(config_entry)
 
+
 class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            if user_input.get("next_step") == "edit_route":
+                return await self.async_step_edit_route()
+            elif user_input.get("next_step") == "update_intervals":
+                return await self.async_step_update_intervals()
 
-        options = self.config_entry.options
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
+                vol.Required("next_step"): vol.In({
+                    "edit_route": "Edit Route",
+                    "update_intervals": "Update Intervals"
+                })
+            })
+        )
+
+    async def async_step_update_intervals(self, user_input=None):
+        if user_input is not None:
+            new_options = dict(self.config_entry.options)
+            new_options[CONF_UPDATE_INTERVAL] = user_input[CONF_UPDATE_INTERVAL]
+            new_options[CONF_FUTURE_UPDATE_INTERVAL] = user_input[CONF_FUTURE_UPDATE_INTERVAL]
+            return self.async_create_entry(title="", data=new_options)
+
+        options = self.config_entry.options
+        return self.async_show_form(
+            step_id="update_intervals",
+            data_schema=vol.Schema({
                 vol.Required(CONF_UPDATE_INTERVAL,
-                             default=options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                             default=options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)): vol.All(
+                    vol.Coerce(int), vol.Range(min=1)),
                 vol.Required(CONF_FUTURE_UPDATE_INTERVAL,
-                             default=options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                             default=options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL)): vol.All(
+                    vol.Coerce(int), vol.Range(min=1)),
             }),
         )
 
@@ -85,7 +108,8 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             if "route_to_edit" in user_input:
                 route_to_edit = user_input.pop("route_to_edit")
-                route_index = next((i for i, route in enumerate(routes) if route[CONF_ROUTE_NAME] == route_to_edit), None)
+                route_index = next((i for i, route in enumerate(routes) if route[CONF_ROUTE_NAME] == route_to_edit),
+                                   None)
                 if route_index is not None:
                     routes[route_index] = user_input
                 else:
