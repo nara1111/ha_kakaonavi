@@ -1,6 +1,7 @@
 from homeassistant import config_entries
 from homeassistant.core import callback
 import voluptuous as vol
+from datetime import timedelta
 from .const import (
     DOMAIN, CONF_APIKEY, CONF_ROUTE_NAME, CONF_START, CONF_END, CONF_WAYPOINT,
     CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND,
@@ -86,6 +87,16 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
             new_options = dict(self.config_entry.options)
             new_options[CONF_UPDATE_INTERVAL] = user_input[CONF_UPDATE_INTERVAL]
             new_options[CONF_FUTURE_UPDATE_INTERVAL] = user_input[CONF_FUTURE_UPDATE_INTERVAL]
+
+            # Update the coordinator
+            hass = self.hass
+            entry = self.config_entry
+            coordinators = hass.data[DOMAIN][entry.entry_id]
+
+            for coordinator in coordinators.values():
+                coordinator.update_interval = timedelta(minutes=user_input[CONF_UPDATE_INTERVAL])
+                coordinator.future_update_interval = timedelta(minutes=user_input[CONF_FUTURE_UPDATE_INTERVAL])
+
             return self.async_create_entry(title="", data=new_options)
 
         options = self.config_entry.options

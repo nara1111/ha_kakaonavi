@@ -52,4 +52,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update."""
+    coordinators = hass.data[DOMAIN][entry.entry_id]
+    for coordinator in coordinators.values():
+        coordinator.update_interval = timedelta(minutes=entry.options[CONF_UPDATE_INTERVAL])
+        coordinator.future_update_interval = timedelta(minutes=entry.options[CONF_FUTURE_UPDATE_INTERVAL])
     await hass.config_entries.async_reload(entry.entry_id)

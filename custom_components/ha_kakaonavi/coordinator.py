@@ -21,19 +21,38 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
         client: KakaoNaviApiClient,
         route: Dict[str, Any]
     ) -> None:
-        update_interval = timedelta(minutes=route.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL))
+        self.route = route
+        self.client = client
+        self.hass = hass
+        self._update_interval = timedelta(minutes=route.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL))
+        self._future_update_interval = timedelta(minutes=route.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL))
+        self.last_future_update: Any = None
+        self.api_calls_today = 0
+        self.last_call_date = dt_util.now().date()
+
         super().__init__(
             hass,
             _LOGGER,
             name=f"KakaoNavi_{route.get(CONF_ROUTE_NAME, 'Unknown')}",
-            update_interval=update_interval,
+            update_interval=self._update_interval,
         )
-        self.client = client
-        self.route = route
-        self.future_update_interval = timedelta(minutes=route.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL))
-        self.last_future_update: Any = None
-        self.api_calls_today = 0
-        self.last_call_date = dt_util.now().date()
+
+    @property
+    def update_interval(self) -> timedelta:
+        return self._update_interval
+
+    @update_interval.setter
+    def update_interval(self, value: timedelta) -> None:
+        self._update_interval = value
+        self.update_interval = value
+
+    @property
+    def future_update_interval(self) -> timedelta:
+        return self._future_update_interval
+
+    @future_update_interval.setter
+    def future_update_interval(self, value: timedelta) -> None:
+        self._future_update_interval = value
 
     async def _async_update_data(self) -> Dict[str, Any]:
         try:
@@ -68,7 +87,7 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
     async def _get_future_data(self) -> Dict[str, Any]:
         now = dt_util.now()
-        if self.last_future_update is None or (now - self.last_future_update) >= self.future_update_interval:
+        if self.last_future_update is None or (now - self.last_future_update) >= self._future_update_interval:
             future_time = now + timedelta(minutes=30)
             future_data = await self.hass.async_add_executor_job(
                 self.client.future_direction,
