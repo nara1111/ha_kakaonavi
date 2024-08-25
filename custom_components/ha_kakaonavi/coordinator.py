@@ -37,13 +37,6 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             update_interval=self._update_interval,
         )
 
-    def set_update_interval(self, minutes: int) -> None:
-        self._update_interval = timedelta(minutes=minutes)
-        self.update_interval = self._update_interval
-
-    def set_future_update_interval(self, minutes: int) -> None:
-        self._future_update_interval = timedelta(minutes=minutes)
-
     async def _async_update_data(self) -> Dict[str, Any]:
         try:
             now = dt_util.now()
