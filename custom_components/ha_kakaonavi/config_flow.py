@@ -1,6 +1,6 @@
-import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
+import voluptuous as vol
 from .const import (
     DOMAIN, CONF_APIKEY, CONF_ROUTE_NAME, CONF_START, CONF_END, CONF_WAYPOINT,
     CONF_PRIORITY, PRIORITY_OPTIONS, PRIORITY_RECOMMEND,
@@ -8,7 +8,6 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL, CONF_ROUTES
 )
 from .api import KakaoNaviApiClient
-
 
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -23,7 +22,7 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
 
                 return self.async_create_entry(
-                    title=user_input[CONF_ROUTE_NAME],  # 경로 이름을 제목으로 사용
+                    title=user_input[CONF_ROUTE_NAME],
                     data={
                         CONF_APIKEY: user_input[CONF_APIKEY],
                     },
@@ -39,7 +38,7 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_FUTURE_UPDATE_INTERVAL: DEFAULT_FUTURE_UPDATE_INTERVAL,
                     }
                 )
-            except Exception as e:
+            except Exception:
                 errors["base"] = "invalid_api_key"
 
         return self.async_show_form(
@@ -53,16 +52,12 @@ class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
-            description_placeholders={
-                "name_description": "Route Name (e.g., Home to Work)",
-            }
         )
 
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
         return KakaoNaviOptionsFlow(config_entry)
-
 
 class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
@@ -78,8 +73,7 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             if "route_to_edit" in user_input:
                 route_to_edit = user_input.pop("route_to_edit")
-                route_index = next((i for i, route in enumerate(routes) if route[CONF_ROUTE_NAME] == route_to_edit),
-                                   None)
+                route_index = next((i for i, route in enumerate(routes) if route[CONF_ROUTE_NAME] == route_to_edit), None)
                 if route_index is not None:
                     routes[route_index] = user_input
                 else:
@@ -118,5 +112,4 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(CONF_PRIORITY, default=PRIORITY_RECOMMEND): vol.In(PRIORITY_OPTIONS),
             }),
             errors=errors,
-            description_placeholders={"route_names": ", ".join(route_names)}
         )

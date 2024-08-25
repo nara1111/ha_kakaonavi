@@ -10,7 +10,7 @@
           "start": "출발지",
           "end": "도착지",
           "waypoint": "경유지 (선택사항)",
-          "priority": "우선순위"
+          "priority": "선호 경로탐색방식"
         }
       }
     },
@@ -31,12 +31,11 @@
         "title": "경로 편집",
         "description": "경로 정보를 수정하세요.",
         "data": {
-          "api_key": "API 키",
           "name": "경로 이름",
           "start": "출발지",
           "end": "도착지",
           "waypoint": "경유지 (선택사항)",
-          "priority": "우선순위"
+          "priority": "선호 경로탐색방식"
         }
       }
     }
