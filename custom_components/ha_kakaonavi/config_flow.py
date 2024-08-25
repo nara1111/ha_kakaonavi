@@ -10,6 +10,7 @@ from .const import (
 )
 from .api import KakaoNaviApiClient
 
+
 class KakaoNaviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
@@ -94,8 +95,8 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
             coordinators = hass.data[DOMAIN][entry.entry_id]
 
             for coordinator in coordinators.values():
-                coordinator.update_interval = timedelta(minutes=user_input[CONF_UPDATE_INTERVAL])
-                coordinator.future_update_interval = timedelta(minutes=user_input[CONF_FUTURE_UPDATE_INTERVAL])
+                coordinator.set_update_interval(user_input[CONF_UPDATE_INTERVAL])
+                coordinator.set_future_update_interval(user_input[CONF_FUTURE_UPDATE_INTERVAL])
 
             return self.async_create_entry(title="", data=new_options)
 

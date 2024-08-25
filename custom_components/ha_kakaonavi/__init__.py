@@ -37,7 +37,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for route in routes:
         try:
             coordinator = KakaoNaviDataUpdateCoordinator(hass, client, route)
-            await coordinator.async_config_entry_first_refresh()
+            await coordinator.async_refresh()  # async_config_entry_first_refresh() 대신 이 줄을 사용
             coordinators[route[CONF_ROUTE_NAME]] = coordinator
         except Exception as err:
             _LOGGER.error(f"Error initializing coordinator for route {route.get(CONF_ROUTE_NAME, 'Unknown')}: {err}")
@@ -55,6 +55,6 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
     coordinators = hass.data[DOMAIN][entry.entry_id]
     for coordinator in coordinators.values():
-        coordinator.update_interval = timedelta(minutes=entry.options[CONF_UPDATE_INTERVAL])
-        coordinator.future_update_interval = timedelta(minutes=entry.options[CONF_FUTURE_UPDATE_INTERVAL])
+        coordinator.set_update_interval(entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL))
+        coordinator.set_future_update_interval(entry.options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL))
     await hass.config_entries.async_reload(entry.entry_id)
