@@ -64,7 +64,19 @@ class KakaoNaviOptionsFlow(config_entries.OptionsFlow):
         self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
-        return await self.async_step_edit_route()
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        options = self.config_entry.options
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required(CONF_UPDATE_INTERVAL,
+                             default=options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                vol.Required(CONF_FUTURE_UPDATE_INTERVAL,
+                             default=options.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=1)),
+            }),
+        )
 
     async def async_step_edit_route(self, user_input=None):
         errors = {}

@@ -10,7 +10,7 @@
           "start": "Departure",
           "end": "Destination",
           "waypoint": "Waypoint (Optional)",
-          "priority": "Preferred path-finding algorighm"
+          "priority": "Preferred path-finding algorithm"
         }
       }
     },
@@ -22,20 +22,22 @@
     "step": {
       "init": {
         "title": "Kakao Navi Options",
-        "description": "Edit the route.",
+        "description": "Set update intervals",
         "data": {
-          "route_to_edit": "The route to edit"
+          "update_interval": "Update interval (minutes)",
+          "future_update_interval": "Future prediction update interval (minutes)"
         }
       },
       "edit_route": {
         "title": "Edit Route",
         "description": "Modify route information",
         "data": {
+          "route_to_edit": "The route to edit",
           "name": "Route Name",
           "start": "Departure",
           "end": "Destination",
           "waypoint": "Waypoint (Optional)",
-          "priority": "Preferred path-finding algorighm"
+          "priority": "Preferred path-finding algorithm"
         }
       }
     }

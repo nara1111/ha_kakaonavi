@@ -8,7 +8,8 @@ from .api import KakaoNaviApiClient
 from .const import (
     CONF_UPDATE_INTERVAL, CONF_FUTURE_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL,
-    CONF_ROUTE_NAME, CONF_START, CONF_END, CONF_WAYPOINT, CONF_PRIORITY
+    CONF_ROUTE_NAME, CONF_START, CONF_END, CONF_WAYPOINT, CONF_PRIORITY,
+    MAX_DAILY_CALLS
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,14 +32,26 @@ class KakaoNaviDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
         self.route = route
         self.future_update_interval = timedelta(minutes=route.get(CONF_FUTURE_UPDATE_INTERVAL, DEFAULT_FUTURE_UPDATE_INTERVAL))
         self.last_future_update: Any = None
+        self.api_calls_today = 0
+        self.last_call_date = dt_util.now().date()
 
     async def _async_update_data(self) -> Dict[str, Any]:
         try:
+            now = dt_util.now()
+            if now.date() != self.last_call_date:
+                self.api_calls_today = 0
+                self.last_call_date = now.date()
+
+            if self.api_calls_today >= MAX_DAILY_CALLS:
+                raise UpdateFailed(f"Daily API call limit ({MAX_DAILY_CALLS}) reached for route: {self.route[CONF_ROUTE_NAME]}")
+
             current_data = await self._get_current_data()
             future_data = await self._get_future_data()
 
             if current_data is None or future_data is None:
                 raise UpdateFailed(f"Failed to fetch data from Kakao Navi API for route: {self.route[CONF_ROUTE_NAME]}")
+
+            self.api_calls_today += 2  # Increment by 2 as we make two API calls
 
             return {"current": current_data, "future": future_data}
         except Exception as err:
